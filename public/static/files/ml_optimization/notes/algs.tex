@@ -1,0 +1,133 @@
+\documentclass[letterpaper,11 pt]{article}
+\usepackage{graphicx}
+\usepackage{amsfonts,amsmath,fullpage,bbm}
+\usepackage{amssymb,amsthm,multirow,verbatim}
+\usepackage{acronym,wrapfig,plain,mathrsfs,enumerate,relsize,color}
+\newtheorem{algorithm}{Algorithm}
+\usepackage{algorithm}
+\newtheorem{theorem}{Theorem}
+\newtheorem{corollary}{Corollary}
+\newtheorem{lemma}{Lemma}
+\newtheorem{notation}{Notation}
+\newtheorem{remark}{Remark}
+\newtheorem{proposition}{Proposition}
+\newtheorem{assumption}{Assumption}
+\newtheorem{definition}{Definition}
+\usepackage{subfig}
+\usepackage{algorithmic}
+\usepackage{pifont}
+\usepackage{footmisc}
+\usepackage[title]{appendix}
+
+\usepackage{caption}
+\usepackage{hyperref}
+\DeclareCaptionType{equ}[][]
+%\captionsetup[equ]{labelformat=empty}
+
+\newcommand{\cmark}{\text{\ding{51}}}
+\newcommand{\xmark}{\text{\ding{55}}}
+\newcommand{\tabincell}[2]{\begin{tabular}{@{}#1@{}}#2\end{tabular}}
+\newcommand{\blue}[1]{{\color{blue}#1}}
+\providecommand{\keywords}[1]{\textbf{\textit{keywords:}} #1}
+\allowdisplaybreaks
+\begin{document}
+\allowdisplaybreaks
+
+\begin{algorithm}[H]
+\caption{The ADAM algorithm computes a batch stochastic gradient to compute momentum and RMSProp vectors at each timestep, with a bias correction step accounting for first and second moment estimates. Model parameters are updated using this recursive gradient information.}
+\label{alg:adam}
+
+{\bf Require:}  parameters $\theta$, stochastic objective function $f_{i}(\theta)$ \\
+{\bf Require:} learning rate $\eta$, exponential decay rates $\beta_1, \beta_2 \in [0,1)$, tolerance $\epsilon$, batch size \\
+{\bf Initialize:} initial parameter vector $\theta_{0}$, initial $1^{st}$ moment vector $m_0 = 0$, initial $2^{nd}$ moment vector $v_0 = 0$, initial timestep $t = 0$ \\
+\-\ \-\ {\bf while} $\theta_t$ is not converged {\bf do} \\
+\-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\   $t = t+1$ \\
+\-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\   $g_{t} = \nabla_{\theta} f_{t} (\theta_{t-1}) $ \-\ \-\ \-\ \-\  (\textit{batch gradient at iteration $t$}) \\
+\-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\   $m_{t} = \beta_{1} \cdot m_{t-1} + (1 - \beta_{1}) \cdot g_{t}$ \-\ \-\ \-\ \-\  (\textit{[Monentum] udpate baised first moment estimate}) \\
+\-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\   $v_{t} = \beta_{2} \cdot v_{t-1} + (1 - \beta_{2}) \cdot g_{t}^{2}$ (\textit{[RMSProp] udpate baised second raw moment estimate})  \\
+\-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\    $\hat{m}_{t} = m_{t} / (1 - \beta_{1}^t) $ \-\ \-\ \-\ \-\  (\textit{[Monentum]  bias-corrected first moment estimate}) \\
+\-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\    $\hat{v}_{t} = v_{t} / (1 - \beta_{2}^t) $ \-\ \-\ \-\ \-\  (\textit{[RMSProp] bias-corrected second raw moment estimate})  \\
+\-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\   $\theta_{t} = \theta_{t-1} - \eta \cdot \hat{m}_{t} / ( \sqrt{\hat{v}_{t}} + \epsilon ) $ \-\ \-\ \-\ \-\  (\textit{[Momentum + RMSProp] update parameters}) \\
+\-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\  {\bf end while} \\
+\-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\  {\bf return} $\theta_{t}$ \\
+
+\end{algorithm}
+
+\pagebreak
+
+\begin{algorithm}[H]
+\caption{SARAH +}
+\label{alg:sarah}
+
+{\bf Require:}  objective function $f(\theta)$ \\
+{\bf Require:} learning rate $\alpha>0$, inner loop size $m$, outer loop size $T$ \\
+{\bf Initialize:} initialize arbitrary parameter vector $\tilde{\theta}_{0} \in \mathbb{R}$ \\
+{\bf Iterate:} \\
+\-\ \-\ {\bf for } $s = 1,2,...,T$ {\bf do} \\
+\-\ \-\ \-\ \-\ \-\ \-\  $\theta_0 = \tilde{\theta}_{s-1}$ \\
+\-\ \-\ \-\ \-\ \-\ \-\   $v_0 = \frac{1}{n}\sum_{i=1}^{n}{\nabla f_{i}(\theta_0)}$ \-\ \-\ \-\ \-\  (\textit{outer loop full gradient computation}) \\
+\-\ \-\ \-\ \-\ \-\ \-\   $\theta_1 = \theta_0 - \alpha v_0$
+\-\ \-\ \-\ \-\ \-\ \-\  (\textit{compute one outer loop parameter update for inner loop})  \\
+\-\ \-\ \-\ \-\ \-\ \-\   $t=1$ \\
+\-\ \-\ \-\ \-\ \-\ \-\  {\bf while } $||v_{t-1}||^2 > \gamma ||v_0||^2$ {\bf and } $t<m$ {\bf do} \\
+\-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\    Sample $i \in \{1,...,n\}$ uniformly at random \\
+\-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\    $v_{t} =   \nabla f_{i_{t}}(\theta_{t})  - \nabla f_{i_{t}}(\theta_{t-1})  + v_{t-1}$    \-\ \-\ \-\ \-\  (\textit{gradient estimate (SARAH update)})  \\
+\-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\   $\theta_{t+1} = \theta_{t} - \alpha v_{t} $ \-\ \-\ \-\ \-\  (\textit{inner loop parameter update}) \\
+\-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\  t = t+1 \\
+\-\ \-\ \-\ \-\ \-\ \-\ {\bf end for} \\
+\-\ \-\ \-\ \-\ \-\ \-\  Set $\tilde{\theta}_{s} = \theta_{t}$  \\
+\-\ \-\ {\bf end for }
+\end{algorithm}
+
+\pagebreak
+
+\begin{algorithm}[H]
+\caption{SVRG}
+
+{\bf Require:}  objective function $f(\theta)$ \\
+{\bf Require:} learning rate $\alpha>0$, inner loop size $m$, outer loop size $T$ \\
+{\bf Initialize:} initialize arbitrary parameter vector $\tilde{\theta}_{0} \in \mathbb{R}$ \\
+{\bf Iterate:} \\
+\-\ \-\ {\bf for } $s = 1,2,...,T$ {\bf do} \\
+\-\ \-\ \-\ \-\ \-\ \-\  $\tilde{\theta} = \tilde{\theta}_{s-1}$ \\
+\-\ \-\ \-\ \-\ \-\ \-\   $\tilde{g} = \frac{1}{n}\sum_{i=1}^{n}{\nabla f_{i}(\tilde{\theta})}$ \-\ \-\ \-\ \-\  (\textit{outer loop full gradient computation}) \\
+\-\ \-\ \-\ \-\ \-\ \-\   $\theta_0 = \tilde{\theta}$  \\
+\-\ \-\ \-\ \-\ \-\ \-\  {\bf for } $t = 1,...,m$ {\bf do} \\
+\-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\    Sample $i \in \{1,...,n\}$ uniformly at random \\
+\-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\    $v_{t-1} =   \nabla f_{i_{t}}(\theta_{t-1})  - \nabla f_{i_{t}}(\tilde{\theta})  + \tilde{g}$    \-\ \-\ \-\ \-\  (\textit{inner loop gradient approximation})  \\
+\-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\   $\theta_{t} = \theta_{t-1} - \alpha \cdot v_{t-1} $ \-\ \-\ \-\ \-\  (\textit{inner loop parameter update}) \\
+\-\ \-\ \-\ \-\ \-\ \-\ {\bf end for} \\
+\-\ \-\ \-\ \-\ \-\ \-\  \textbf{Option 1: }Set $\tilde{\theta}_{s} = \theta_{t}$ with $t \in \{0,1,...,m\}$ chosen uniformly at random  \\
+\-\ \-\ \-\ \-\ \-\ \-\  \textbf{Option 2: }Set $\tilde{\theta}_{s} = \theta_{m}$  \\
+\-\ \-\ {\bf end for }
+\end{algorithm}
+
+\pagebreak
+
+\begin{algorithm}[H]
+\caption{The SARAH algorithm is identical to SVRG except for the \textit{SARAH update}, which modifies the stochastic gradient estimate to use recursive gradient estimate information rather than the initialized gradient to update the gradient estimate in the inner loop.}
+\label{alg:sarah}
+
+{\bf Require:}  objective function $f(\theta)$ \\
+{\bf Require:} learning rate $\alpha>0$, inner loop size $m$, outer loop size $T$ \\
+{\bf Initialize:} initialize arbitrary parameter vector $\tilde{\theta}_{0} \in \mathbb{R}$ \\
+{\bf Iterate:} \\
+\-\ \-\ {\bf for } $s = 1,2,...,T$ {\bf do} \\
+\-\ \-\ \-\ \-\ \-\ \-\  $\theta_0 = \tilde{\theta}_{s-1}$ \\
+\-\ \-\ \-\ \-\ \-\ \-\   $v_0 = \frac{1}{n}\sum_{i=1}^{n}{\nabla f_{i}(\theta_0)}$ \-\ \-\ \-\ \-\  (\textit{outer loop full gradient computation}) \\
+\-\ \-\ \-\ \-\ \-\ \-\   $\theta_1 = \theta_0 - \alpha v_0$
+\-\ \-\ \-\ \-\ \-\ \-\  (\textit{compute one outer loop parameter update for inner loop})  \\
+\-\ \-\ \-\ \-\ \-\ \-\  {\bf for } $t = 1,...,m-1$ {\bf do} \\
+\-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\    Sample $i \in \{1,...,n\}$ uniformly at random \\
+\-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\    $v_{t} =   \nabla f_{i_{t}}(\theta_{t})  - \nabla f_{i_{t}}(\theta_{t-1})  + v_{t-1}$    \-\ \-\ \-\ \-\  (\textit{gradient estimate (SARAH update)})  \\
+\-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\ \-\   $\theta_{t+1} = \theta_{t} - \alpha v_{t} $ \-\ \-\ \-\ \-\  (\textit{inner loop parameter update}) \\
+\-\ \-\ \-\ \-\ \-\ \-\ {\bf end for} \\
+\-\ \-\ \-\ \-\ \-\ \-\  Set $\tilde{\theta}_{s} = \theta_{t}$ with $t$ chosen uniformly at random from $\{0,1,...,m\}$  \\
+\-\ \-\ {\bf end for }
+\end{algorithm}
+
+\pagebreak
+
+
+
+\end{document}
