@@ -1,0 +1,345 @@
+---
+title: Engineering Decision Analysis
+date: 'December 2023'
+tags: ['SDS', 'blog', 'highlights']
+draft: true
+summary: Decision Analysis, Corporate Standard Electrical Design Tool Selection
+---
+
+# Decision Analysis: Corporate Standard Electrical Design Tool Selection
+
+*A detailed decision analysis for a major Engineering decision. The decision models a real Engineering decision, however names, finances, and other details are modified as to not reveal any sensitive proprietary information. Note, this is a condensed version of the final project delivered for the course, and covers the highlights of the analysis.*
+
+## Decision Context
+
+An aerospace company has recently renegotiated terms with a customer for future contracts.  Any new contracts will have standard requirements to use electrical design tools that adhere to digital Model Based Systems Engineering (MBSE).  Requirements for digital MBSE are provided by the customer to be evaluated by the company, leaving the demonstration of meeting these requirements open-ended.  Future contract deliverables must adhere to these requirements.  Note that the customer will receive a full technical data package for a deliverable, including drawings, test equipment and procedures, and other Engineering artifacts.
+
+The current tools that the company use for electrical design do not meet the requirements for digital MBSE.  To achieve compliance with new contracts, the company must decide on a new strategy for standardized electrical design tools (or updates to existing tools) that will be administered to multiple Engineering directorates within the company.
+
+## Who is making the decision?
+
+The final decision-maker in this decision is the VP of Engineering for the company. The VP will be collaborating with an advisory panel from department heads of each Engineering directorate.  This panel will be led by the Director Electrical Subsystems Directorate (ESD), who will be responsible for a trade study to determine the best alternatives for the decision.  For this project, we will be modeling the decision from the perspective of the Director of ESD and will be providing a recommendation to the VP based on our decision analysis.
+
+## Defining Objectives of Decision Maker
+
+### Objectives Development
+
+The MBSE fundamental objective was determined by leadership at the Engineering VP level in collaboration with several functional areas of the organization as well as the customer.  In particular, the MBSE requirements driving these fundamental objectives are part of a larger package of new requirements driving digital architecture and design commonality they will require for their upcoming technology development needs.  The elicitation process here was fairly straightforward; the company's overall objective is to maximize profit, and the new requirements became hard roadblocks for generating profits, hence the fundamental objective must be to remove roadblocks and, in this case, to demonstrate compliance to digital MBSE tools.
+
+Internally, Engineering leadership at and above VP level collaborated with executive leadership and other functional directorates to establish the fundamental objectives of minimizing directorate costs over a ten-year period as they related to the new customer requirements. Additionally, time impacts our value measure (cost), this collaboration established the fundamental objective of demonstrating compliance with the MBSE requirements within 3 years to keep up with planned contract bids.
+
+These fundamental objectives were then brought from the VP level to the ESD department level for collaboration, where the ESD team helped to elicit agreeable means objectives that satisfied the VP's expectations.
+
+
+<img src="files/decision/images/objdiag.png" alt="Decision - Tool A" width="400"/> 
+
+### Fundamental Objectives
+
+The fundamental objectives will reflect exactly what the decision maker wants to accomplish within the scope of action for this decision. So, the fundamental objective must be actionable to the decision maker.
+
+The fundamental objective of the company is to maximize company profits.  However, the decision maker in this situation, the VP of Engineering, does not necessarily have actionable influence on directly improving/maximizing profits for the corporation within the scope of this decision. Rather, the fundamental objective of this decision, that is within the scope of this decision maker, is ensure the Engineering directorate:
+
++ Requirements compliance for future contracts.
+    + In the scope of this decision, satisfy digital MBSE requirements (this decision alone will not satisfy all future contracts requirements). 
+    + Minimize directorate costs over the next 10 years.  
+
+Note that in this case, the requirements to use digital MBSE tools are hard for future contract awards, they are non-negotiable, and noncompliance would result in not being awarded contracts.  For purposes of the scope of this decision, this customer is the company's only source of profits (a simplified assumption for the purposes of this decision analysis).  Therefore, the digital MBSE requirement must be satisfied; the decision and objectives will be characterized accordingly.
+
+### Means Objectives
+
+The means objectives will describe the ways in which the fundamental objectives can be achieved.  In this case, the means to accomplish the fundamental objectives will consider the selection of tools to be used, as well as any value implications of the selection of the tool (costs associated with tool activities).
++ Conduct a trade study to determine candidate tools, required development, and deployment strategies 
+    + Gain understanding of tool capabilities
+    + Evaluate existing tools (internal) and third-party candidates (external)
+    + Identify real candidate tools, eliminate non-candidates based on capabilities analysis against MBSE requirements
+    + Select a tool strategy
+    + Selection of the tool will impact other hierarchal means objectives, as different tools may require different approaches to additional development and deployment
++ Purchase a tool
+    + If an alternative is selected that requires purchasing a tool, it is within scope of our objective as it directly impacts costs
++ Additional tool development
+    + Depending on which tool is selected, there may be some additional development of capability may be required to meet the MBSE requirements
+    + Depending on which tool is selected, there may be development required for the operational package (training, etc.) for the tool that is required to complete deployment
++ Deployment of tool
+    + Depending on which tool is selected, the strategy of deployment of the tool to the 1000 electrical design seats will vary
++ Allocate Engineering Resources
+    + Depending on which tool is selected, different amounts of resources may be required to complete the development and deployment objectives, and will have varying impact on cost and time for each objective
+
+
+## Decision Frame
+
+<img src="files/decision/images/decision_options.png" alt="Decision Frame" width="400"/> 
+
+It has been known for some time within the company that the new MBSE requirements would be coming, and in anticipation the ESD has been funding some areas to come up with alternatives that achieve digital MBSE compliance.  
+
+The VP requires that the tool minimizes cost forecast over the next 10 years, and that we must be fully compliant to MBSE requirements within 3 years.  This means the tool is fully compliant to requirements and fully deployed to the 1000 “seats” for electrical designers.  If we are not compliant within three years, the company will not realize revenue for contracts (revenue will be “penalized”), which amounts to $25M per quarter ($100M per year).
+
+### Trade Study Team
+
+Prior to this decision, the team's evaluation of each candidate tool employed a set of requirements developed by the team, and the resulting characterization of the alternatives was based upon the results of the evaluation criteria.  The evaluation criteria can be summarized as follows.
+
++ Each vendor was asked to complete an evaluation of their tool based on a list of core functional and development requirements, preferred functional and development requirements, and nice-to-have items. 
+
++ Prior to the team's review of each vendor's internal evaluations (to avoid any cognitive biases from seeing vendor results), the trade study team used each tool to create an example project internally that evaluates each of the core/preferred/nice-to-have criteria and completes the same evaluation of the tool.
+
++ After the completion of the vendor and internal evaluations, the results are compared by the trade study team.  Any discrepancies that are identified between the evaluations are discussed further with the respective vendor (with the discrepancy unknown to vendor to avoid biases) to confirm whether the internal evaluation was correct or if some functionality was missed.
+
++ Several possible license purchase scenarios were evaluated through separate channels outside of the trade study team to generate quotes to understand tool costs, as well as support packages from each vendor.
+
++ Development time estimates were generated for each tool on the basis of which requirements were not met in full that needed development, based on historical data of other tool development efforts.
+The primary purpose of using the same evaluation criteria for evaluating each tool was to help avoid potential biases in the team's evaluation.  Although the Engineers that comprise the trade study team were hand selected for their expertise, they each have background and experience with different tool sets, some of which are included in the final candidate tools.  Collaboration between the team was moderated by management, to prevent any groupthink or availability bias effects.  The evaluation criteria also aided in the elicitation of “apples-to-apples” comparisons of development estimates and success likelihood to meet MBSE requirements.  
+
+The results of the trade study were compiled to deliver the following details to the decision stakeholders.
+
+#### Option A
+
+<img src="files/decision/images/decision_a.png" alt="Decision - Tool A" width="400"/> 
+
+An ongoing trade study has been evaluating a tool, Tool A, and has shown that it meets 75% of the MBSE requirements.  The trade study team, who has been working with Company A during the trade study, believes that 100% of the requirements can be met with an additional man-year of development, and is fully confident that the development will be successful.  Additionally, Tool A has already been deployed on several programs as a part of the trade study. 200 Engineers are trained on Tool A and the operational package (OP) of the tool (training documentation, standards development, customization) is 95% developed and would require 0.25 man-years. Tool A is currently using 100 electrical designer “seats” at a cost of $35M/year.  Note, the per year costs are scaled to the number of seats if seats are reduced (that is, if seats are reduced to 10, cost is $3.5M per year).  If Tool A is not selected, it must be maintained at 10 “seats” for an additional 5 years for programs currently using the tool, so selection of another tool will add $17.5M to the cost in the value function.
+
+#### Option B
+
+<img src="files/decision/images/decision_b.png" alt="Decision - Tool B" width="400"/> 
+
+Recently, Company B gave a training course and “pitch” to the trade study team for their tool suite, Tool B. This tool meets 90% of the company's MBSE objectives “out of the box” and requires development of the remaining 10%.  However, since the trade study team has very little experience (only experience from this training) and feels 50% confident that the remaining 10% could be developed in a half man-year.  If the 10% cannot be developed successfully, it is no longer a viable alternative and another tool must be selected. Company B has committed to providing 50% of the OP of the tool, but the remaining development of proprietary portions of the OP will require 1 man-year of development. 
+
+#### Option C
+
+<img src="files/decision/images/decision_c.png" alt="Decision - Tool C" width="400"/> 
+
+The trade study team has also evaluated the company's current tool, Tool C, to determine whether it is a viable candidate.  The tool is free to the company as part of a package of an Engineering design suite from Company C that is already budgeted for mechanical design.  The tool is the current electrical design standard tool, and all Engineers are trained for the tool when they are hired.  Unfortunately, the tool meets only 10% of MBSE requirements, and would require 10 man-years of development (Company C will not support tool development).  The trade study team is 25% confident that the tool can be developed successfully, and if it is not another tool must be selected.  It would also require 1 man-year of OP development.
+
+#### Option D
+
+<img src="files/decision/images/decision_donothing.png" alt="Decision - Do Nothing" width="400"/> 
+
+The last alternative that has been evaluated by the trade study team is the “do nothing” alternative, and continuing with current electrical design standards using Tool C.  This alternative is non-compliant, and we believe that the customer could be convinced to proceed without compliance with 5% confidence until new requirements are developed.
+
+### Quotes
+
+Currently, the company requires 1000 “seats” for an electrical design tool.  The quotes for 1000 seats are as follows:
+•	$30M/year for Tool A
+•	$15M/year for Tool B
+•	$0/year for Tool C
+
+Development costs per man-year are $5M.  A man-year here is defined as 1 dedicated Engineer working full-time with all associated operational costs of standard Engineering work.  NOTE: OP development does not begin until MBSE tool development is successful.
+
+### Frame Pyramid
+
+The VP requires that we are MBSE compliant within three years and that costs over 10 years are minimized.  Therefore, our decision frame includes only options A, B, C.  
+
+<img src="files/decision/images/decision_pyramid.png" alt="Decision Frame Pyramid" width="800"/> 
+
+
+## Value Modeling
+
+### Value Function Development
+
+The value function will measure the cost for alternatives and map to US Dollars as the value measure, since all fundamental objectives either directly or indirectly pertain to the minimization of costs and ultimately the maximization of profits.  Costs were determined during objectives elicitation to be the direct value measure for our alternatives based on the objectives analysis.  This ultimately gives a simple value measure with which to rank our alternatives.
+
+Note, since 100% MBSE requirements compliance is required for any alternative, there is no value measure needed for requirements compliance to incorporate in the value function.
+Within the scope of the decision, costs for development, deployment, and the tools themselves are either dependent directly upon dollar costs, or by time and resource allocation.  Time and resources are identified to be indirect value measures, and thus represent probabilistic relevance to cost.
+
+#### Quote Costs
+
+When we select a tool, there will be a cost associated with the purchase of the tool itself, if it is not already purchased.  The representation in the value function is expressed as
+
+$$Quote\left(X_{tool}\right)\ \ast\ 10yrs$$
+
+Note, the quotes are expressed as cost per year.   Also, the costs associated with the quotes are not realized until all OP and MBSE development is completed (i.e. Development is successful).
+
+#### Tool development, MBSE Requirements compliance
+
+There is time associated with the development of the tool core capabilities (relevant to adherence to MBSE requirements), and are dependent on the tool selected, as well as a parameter designated to describe the resources applied to complete the development.
+The parameter for resources will calculate the time to complete the development task based on the man-years required to complete the development task as determined by the trade study.
+
+$$t_{1i}=\frac{manyrs_{MBSE}\left(X_{tool}\right)}{FTH_{tooldev}}$$
+
+Where $t_{1i}$ is in years and $FTH_{tooldev}$ is the parameter describing the number of full-time engineers allocated to the task of developing the tool.  The i subscript denotes each separate “attempt” at MBSE development and includes only the unsuccessful attempts made and the successful attempt.  This parameter can be “tuned” during our decision analysis.
+Our development costs to complete capability development of the selected tool are expressed as
+
+$$Development_{MBSE}\left(X_{tool}\right)=manyrs_{MBSE}\left(X_{tool}\right)\ast\left(5M/manyear\right)$$
+
+NOTE: If the development of the selected tool is unsuccessful, both the $t_{1i}$ and $Development_{MBSE}\left(X_{tool}\right)$ are realized and are added to subsequent MBSE development efforts.  So, total cost in the value function will account for the sum of unsuccessful development attempts with the successful attempt.
+
+#### Tool development, operational package
+
+The time associated with the development of the operational package (which will in turn complete deployment) is calculated similarly to the capability development costs. NOTE: The OP package development does not begin until the successful MBSE development of the tool selected.  If MBSE development of the selected tool is unsuccessful, this OP development attributed to that tool will be 0.
+
+$$t_2=I\left(X_{tool}\ development\ successful\right)\ast\frac{manyrs_{OP}\left(X_{tool}\right)}{FTH_{OP}}$$
+
+Where $\ I\left(X_{tool}\ development\ successful\right)$ is the indicator function (value of 1 if selected tool development successful, and 0 otherwise.)
+$t_2$ is in years and $FTH_{OP}$ is the parameter describing the number of full-time engineers allocated to the task of developing the operational package for the selected tool.  
+Our development costs to complete capability development of the selected tool are expressed as
+
+$$Development_{OP}\left(X_{tool}\right)=manyrs_{OP}\left(X_{tool}\right)\ast\left(5M/manyear\right)$$
+
+#### Maintenance cost
+
+We note that Tool A will need to be maintained an additional 5 years at 10 “seats” if it is not selected at a cost of $17.5M, so we will include the following in the completed value function
+
+$$Maintain\left(X_{tool}\right)\ =\ I\left(X_{tool}\neq T o o l\ A\right)\ast17.5M\$$
+
+Where $\ I\left(X_{tool}\neq T o o l\ A\right)$ is the identity function (value of 1 if Tool A is not selected, and 0 otherwise) to quantify the cost for 5-year maintenance of Tool A.
+
+#### Contracts penalties
+
+If development is improperly resourced and takes more than three years, the company will not be in compliance with new contracts and will incur a $100M penalty per year. To account for this, we use the time calculations from above as inputs to the penalty function. Note, this penalty is essentially a parameter that can be adjusted based on the number of resources available to allocate to the tasks.
+
+$$Penalty(\left(t_{1i},t_2\right)\ =\$100M\ast I\left(\sum_{i\ \in a t t e m p t s} t_{1i}+t_2\geq3\right))$$
+
+Where $I\left(\sum_{i\ \in a t t e m p t s} t_{1i}+t_2\geq3\right)$ is the identity function (value of 1 for $\sum_{i\ \in a t t e m p t s} t_{1i}+t_2\geq3$, and 0 otherwise) to quantify the cost penalty of running past the 3-year window to demonstrate MBSE compliance.  The term $\sum_{i\ \in a t t e m p t s} t_{1i}$ represents the sum of time allocated for all unsuccessful attempts and the successful attempt at MBSE development.
+
+#### Cost function summary
+
+The value function combines the above costs to determine the value for selecting an alternative
+
+$$Cost\left(X_{tool}\right)=\ Development_{MBSE}\left(X_{tool}\right)\ +\ Development_{OP}\left(X_{tool}\right)\ +\ Quote\left(X_{tool}\right)\ \ast\ 10yrs$$
+$$\ +\ Maintain\left(X_{tool}\right)+Penalty(\left(t_{1i},t_2\right)$$
+
+This will allow us to calculate the cost values of our alternatives when characterizing our decision analysis.
+
+#### Contracts revenue
+
+For simplicity, over 10 years projected revenue of contract awards is $10,000M.  Only costs characterized above can impact revenue within the context of this decision.  
+
+### Value Function
+
+In total then, our value (profit) can be expressed as the following.
+
+$$Profit\left(X_{tool}\right)=\ \$10000\ -\ Cost\left(X_{tool}\right)\ \ $$
+
+
+## Decision Analysis
+
+*Analyses in subsequent sections were built using [PrecisionTree](https://lumivero.com/products/decision-tools/precisiontree/) Excel software plugin*
+
+### Reasoning
+
+The efforts leading up to this decision were carefully planned to generate meaningful inputs to the decision model, and to make an informed and objective decision that is critical to the success of the company moving forward.  Part of the tasking leading up to the decision characterization included the deliberate assessment of the probabilities of success with development of each tool, which is critical to our analysis.  These probabilities were derived from the tool evaluations as part of the study along with historical data from each vendor.  The final probabilities of successful development are treated as-is in our analysis; any derivation of conditional probabilities was processed by the trade study team in their analysis.  
+
+Our reasoning for the approach to the decision modeling is straightforward; we will first decide to proceed with development of a tool from the three, if the development is not successful for that tool we will make another decision between the remaining two tools, and so forth until our development is successful and our MBSE requirements are met.  This dictates the construction of the tree, and the probabilities discussed above help to characterize the alternatives.  Lastly, all relevant cost and revenue information was collected by the trade study team to help complete the characterization of our decision tree, and allow us to compute expected values of all possible outcomes in order to rank our alternatives and select the best option as a risk-neutral decision maker.
+
+### Influence Diagram
+
+<img src="files/decision/images/decision_influence.png" alt="Influence Diagram" width="800"/> 
+
+#### Decisions (Green Square Nodes)
+
+| Decision |	Description |
+|---|---|
+|Tool Selection|	The Engineering VP will need to make a decision which Tool to proceed with implementation.|
+|Select different tool |	If a tool is selected and development fails, an additional decision will be required to select a different tool. |
+|Select Tool A	|Only Tool A has 100% probability of successful development, thus it is the last remaining option when development is unsuccessful for the other two tools. It is technically a decision because we can choose to “do nothing” at this juncture. |
+
+#### Distinctions (Red Circle Nodes)
+
+|Distinctions|	Description|
+|---|---|
+|Development Results (1st att)|	The uncertainty node representing the distinction for the results of MBSE development after the first decision node (first tool selection).  The development will either be successful or unsuccessful.  The node will influence development time and tool costs.|
+|Development Results (2nd att)|	The uncertainty node representing the distinction for the results of MBSE development after the second decision node, which only manifests if the development attempt of the tool selected in the first decision is unsuccessful. Influence here is similar to the 1st attempt, however if development is unsuccessful, we are forced to the Tool A decision as it is the only tool that can remain.| 
+|Available Resources|	An unknown within the frame of the decision at the time of the decision. The calculations will use the best estimates of available resources. Development time is influenced by |
+
+
+#### Characteristics (Blue Rounded Square Nodes)
+
+|Characteristic|	Description|
+|---|---|
+|Development Time|	Inputs to development time consist of the MBSE development man*year estimate for the selected tool and pass through the development successful/unsuccessful node depending on the realized outcome. The “Available Resources” input to this node and are used with the man*year estimates to calculate time for each development outcome that is realized.  Calculated total development time is then passed into Penalties node.|
+|Penalties	|Input is calculated total development time, calculates penalties incurred for schedule overrun. Outputs influence total costs node |
+|Tool Costs (All Costs) |	Captures all costs for development. Note that this diagram is simplified; unsuccessful MBSE development passes on through all nodes in path and sum at this node. For example, if we select a tool and development is unsuccessful, we select a different tool and it is unsuccessful, and finally we proceed with Tool A, all MBSE development costs are added at this node.  This node also accounts for costs for OP development from a successful development outcome. If a tool other than Tool A is selected, it will also capture ongoing maintenance costs of Tool A. |
+|Total Costs|	All costs from Penalties node and Tool Costs are combined and output to total revenue calculation.|
+|Total Revenue|	All costs are subtracted from projected revenue|
+
+### Decision tree
+
+
+<img src="files/decision/images/decision_tree.png" alt="Decision Tree" width="800"/> 
+
+The decision tree is constructed based on the initial decision between the three original alternatives, Tool A, Tool B, and Tool C. Only Tool A has a 100% chance of completed development, so if it is selected at any point, it will always be the end of the branch. If Tool B or Tool C is selected, its development may be successful or unsuccessful.  In the case that it is successful, the branch ends, and if it is unsuccessful, we face a decision to proceed with the remaining tool(s) that have not been selected.
+
+<img src="files/decision/images/decision_params.png" alt="Decision Tree Parameters" width="800"/> 
+
+A table was created to aid in the construction of the value functions for each possibility.  The table was used to construct functions in the PrecisionTree tool to allow flexibility in adjustment of parameters. Final numbers that are displayed are calculated from the value function using the table.  This analysis was run under the assumption that 2 FTEs would be available for MBSE development labor, and 1 FTE would be available for OP package development.  “Time” accrued through unsuccessful development outcomes only impacts penalties and is accounted for in the “Penalties” section of the table.
+
+### Sensitivity Analysis
+
+An adjustment of several parameters will be performed to analyze the sensitivity of the decision. The sensitivity analysis will be performed using the following parameters and ranges:
+
+*NOTE: [brackets indicate initial value]*
+
++ Development Labor Available [2 FTE]
+    + Range: -50%/+200%
+    + We can at most allocate 6 FTEs (due to expertise and availability) for the development labor based on availability in the department on this timeline.  We would also like to understand if our decision is affected if we allocate only 1 FTE to development.
++ OP Labor Available [1 FTE]
+    + Range: -50%/+200%
+    + We can at most allocate 3 FTEs (due to expertise and availability) for the operational package development labor based on availability in the department on this timeline.  We would also like to understand if our decision is affected if we allocate only 0.5 FTE to development.
++ Tool B Development Success probability [50%]
+    + Range: -75%/+75%
+    + The ranges for variation in success probability were recommended by the trade study team based on historical data
++ Tool C Development Success probability [25%]
+    + Range: -75%/+75%
+    + The ranges for variation in success probability were recommended by the trade study team based on historical data
++ Tool A Quote [$350,000,000]
+    + Range: -50%/0%
+    + -50% determined by historical negotiations data for tool quotes
++ Tool B Quote [$150,000,000]
+    + Range: -50%/0%
+    + -50% determined by historical negotiations data for tool quotes
+
+
+<img src="files/decision/images/decision_torspidiagram.png" alt="Tornado and Spider Diagrams" width="800"/> 
+
+The Tornado and Spider diagrams indicate that the expected value of the decision is sensitive only the Tool A Quote, Tool B Quote, and Development Labor Available.
+
+<img src="files/decision/images/decision_sensitivity.png" alt="Sensitivity Analysis" width="800"/> 
+
+Tool A Quote will get us closer to a better expected value for the decision than Tool B, but not quite there even with the quote cut in half, which has no historical precedent at the company.  If we put as much manpower as available, we also approach the value for Tool B, but also still fall just shy of the expected value of Tool B.  We do, however, improve our expected value for Tool C over Tool B at 3.5 FTEs.  So, in all cases, best-case-scenario would not change our decision if we have a risk-neutral attitude.
+
+### Recommendation
+
+<img src="files/decision/images/decision_recommendation.png" alt="Recommendation" width="800"/> 
+
+Based on the decision tree and using expected value to rank alternatives, the recommendation is to proceed first with Tool B.  If Tool B development is unsuccessful, then at the “Select Different Tool” decision node, we recommend selecting Tool A, which will in turn guarantee successful tool development.  The expected value of this recommendation for total revenue is **$9,733,125,000.00**.
+
+## Risk
+
+### Risk Attitude
+
+The decision-maker has first evaluated the decision analysis with a risk-neutral attitude.  All details in the decision tree evaluate the decision based upon expected values, and do not incorporate any adjustment for a risk-seeking or risk-averse attitude.  In general, the company personnel are trained to employ a risk-neutral attitude.  However, given the criticality of the success of the deployment of a compliant tool, the Engineering VP requested a cursory analysis of a risk tolerance of 1% of the 10 year projected revenue, or $100,000,000.  We will use an exponential utility function with a risk tolerance R=$100M.
+
+### Updated decision tree with risk attitude
+
+<img src="files/decision/images/decision_risktree.png" alt="Decision Tree with Risk Attitude" width="800"/> 
+
+With the adjustment for risk tolerance, our dominant option is selecting Tool A outright to start. In this case, our decision would be risk averse; we select Tool A outright from the start as it is the “safest” option from the start (development success is guaranteed).  We are willing to tolerate some losses as compared against our analysis of a risk-neutral decision.
+
+### Sensitivity Analysis with Risk Attitude
+
+<img src="files/decision/images/decision_torspidiagramrisk.png" alt="Tornado and Spider Diagrams with Risk Attitude" width="800"/> 
+
+Our adjustment for risk resulted in selecting Tool A outright based on an adjusted attitude toward risk.  With this adjustment of our Utility function, we see that now the expected value of our decision is only sensitive to the Quote Tool A parameter, and no longer the others.
+
+### Updated recommendation with risk attitude
+
+<img src="files/decision/images/decision_recommendationrisk.png" alt="Recommendation with Risk Attitude" width="800"/> 
+
+With an adjustment to our risk tolerance and updated exponential utility function with R=$1000M, we now recommend selecting Tool A from the start.  This guarantees successful development of an MBSE compliant tool.  The expected value of this recommendation for total revenue is **$9,643,750,000.00**.
+
+## Final Decision
+
+The final recommendation from the Trade Study team is based on the request of the decision maker to provide analysis for the decision based on a risk neutral attitude as well as an assessment if some tolerance to risk was acceptable.
+
+<img src="files/decision/images/decision_riskneutralfinal.png" alt="Risk Neutral Final Recommendation" width="400"/> 
+
+If the VP takes a risk neutral attitude, the Trade Study Team recommends proceeding with the development of Tool B.  Part of the recommendation is that we recommend deploying any efforts possible to negotiate the Tool B and Tool A quotes to a lower price tag.   Additionally, we recommend allocating as many resources as possible to the development of the tool(s).  Together, these will maximize our revenue.  
+If Tool B development is unsuccessful, then at the “Select Different Tool” decision node, we recommend selecting Tool A, which will in turn guarantee successful tool development.  The expected value of this recommendation for total revenue is **$9,733,125,000.00**.
+
+<img src="files/decision/images/decision_risktolerancefinal.png" alt="Risk Neutral Final Recommendation" width="400"/> 
+
+If the VP takes a risk attitude with tolerance to risk as specified in [the Risk Attitude section](#risk-attitude), the Trade Study Team recommends proceeding with the development of Tool A.  Additionally, we recommend allocating 1 FTE for development labor as the expected value of the outcome is not sensitive to development labor at that lower bound.  Lastly, we recommend deploying any efforts possible to negotiate Tool A quotes to a lower price tag.  The expected value of this recommendation for total revenue is **$9,643,750,000.00**.
+
+## References
+
++ Howard, RA., Abbas AE. (2016). Foundations of Decision Analysis.  Pearson
+
+

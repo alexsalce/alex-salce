@@ -49,3 +49,10 @@ input:-webkit-autofill:focus {
   display: inline-block;
   vertical-align: middle;
 }
+
+/* Manually added rules */
+
+img[src*='#center'] { 
+    display: block;
+    margin: auto;
+}
