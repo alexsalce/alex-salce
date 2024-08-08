@@ -1,8 +1,8 @@
 /** @type {import("pliny/config").PlinyConfig } */
 const siteMetadata = {
   title: 'Alex Salce - Statistics and Data Science',
-  author: 'Alex Salce',
-  headerTitle: 'Alex Salce Blog',
+  author: 'Alex V. Salce',
+  headerTitle: 'Alex Salce',
   description: 'A blog portfolio',
   language: 'en-us',
   theme: 'system', // system, dark or light
@@ -10,16 +10,16 @@ const siteMetadata = {
   siteRepo: 'https://github.com/alexsalce/alex-salce',
   siteLogo: `${process.env.BASE_PATH || ''}/static/images/logo.png`,
   socialBanner: `${process.env.BASE_PATH || ''}/static/images/twitter-card.png`,
-  mastodon: 'https://mastodon.social/@mastodonuser',
+  // mastodon: 'https://mastodon.social/@mastodonuser',
   email: 'avsalce@gmail.com',
   github: 'https://github.com/alexsalce',
-  x: 'https://twitter.com/x',
+  // x: 'https://twitter.com/x',
   // twitter: 'https://twitter.com/Twitter',
-  facebook: 'https://facebook.com',
+  // facebook: 'https://facebook.com',
   youtube: 'https://youtube.com',
-  linkedin: 'https://www.linkedin.com',
-  threads: 'https://www.threads.net',
-  instagram: 'https://www.instagram.com',
+  linkedin: 'https://www.linkedin.com/in/alexsalce',
+  // threads: 'https://www.threads.net',
+  // instagram: 'https://www.instagram.com',
   locale: 'en-US',
   analytics: {
     // If you want to use an analytics provider you have to add it to the
