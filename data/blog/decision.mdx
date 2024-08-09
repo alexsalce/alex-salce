@@ -157,7 +157,11 @@ Within the scope of the decision, costs for development, deployment, and the too
 
 When we select a tool, there will be a cost associated with the purchase of the tool itself, if it is not already purchased.  The representation in the value function is expressed as
 
-$$\text{Quote}\left(X_{tool}\right)\ \ast\ 10yrs$$
+$$
+\begin{aligned}
+    \text{Quote}\left(X_{tool}\right)\ \ast\ 10yrs
+\end{aligned}
+$$
 
 Note, the quotes are expressed as cost per year.   Also, the costs associated with the quotes are not realized until all OP and MBSE development is completed (i.e. Development is successful).
 
@@ -166,12 +170,20 @@ Note, the quotes are expressed as cost per year.   Also, the costs associated wi
 There is time associated with the development of the tool core capabilities (relevant to adherence to MBSE requirements), and are dependent on the tool selected, as well as a parameter designated to describe the resources applied to complete the development.
 The parameter for resources will calculate the time to complete the development task based on the man-years required to complete the development task as determined by the trade study.
 
-$$t_{1i}=\frac{manyrs_{MBSE}\left(X_{tool}\right)}{FTH_{tooldev}}$$
+$$
+\begin{aligned}
+    t_{1i}=\frac{manyrs_{MBSE}\left(X_{tool}\right)}{FTH_{tooldev}}
+\end{aligned}
+$$
 
 Where $t_{1i}$ is in years and $FTH_{tooldev}$ is the parameter describing the number of full-time engineers allocated to the task of developing the tool.  The i subscript denotes each separate “attempt” at MBSE development and includes only the unsuccessful attempts made and the successful attempt.  This parameter can be “tuned” during our decision analysis.
 Our development costs to complete capability development of the selected tool are expressed as
 
-$$\text{Development}_{MBSE}\left(X_{tool}\right)=\text{manyrs}_{MBSE}\left(X_{tool}\right)\ast\left(5M/\text{manyear}\right)$$
+$$
+\begin{aligned}
+    \text{Development}_{MBSE}\left(X_{tool}\right)=\text{manyrs}_{MBSE}\left(X_{tool}\right)\ast\left(5M/\text{manyear}\right)
+\end{aligned}
+$$
 
 NOTE: If the development of the selected tool is unsuccessful, both the $t_{1i}$ and $Development_{MBSE}\left(X_{tool}\right)$ are realized and are added to subsequent MBSE development efforts.  So, total cost in the value function will account for the sum of unsuccessful development attempts with the successful attempt.
 
@@ -179,19 +191,31 @@ NOTE: If the development of the selected tool is unsuccessful, both the $t_{1i}$
 
 The time associated with the development of the operational package (which will in turn complete deployment) is calculated similarly to the capability development costs. NOTE: The OP package development does not begin until the successful MBSE development of the tool selected.  If MBSE development of the selected tool is unsuccessful, this OP development attributed to that tool will be 0.
 
-$$t_2=I\left(X_{tool}\ \text{development successful}\right)\ast\frac{manyrs_{OP}\left(X_{tool}\right)}{FTH_{OP}}$$
+$$
+\begin{aligned}
+    t_2=I\left(X_{tool}\ \text{development successful}\right)\ast\frac{manyrs_{OP}\left(X_{tool}\right)}{FTH_{OP}}
+\end{aligned}
+$$
 
 Where $\ I\left(X_{tool}\ \text{development successful}\right)$ is the indicator function (value of 1 if selected tool development successful, and 0 otherwise.)
 $t_2$ is in years and $FTH_{OP}$ is the parameter describing the number of full-time engineers allocated to the task of developing the operational package for the selected tool.  
 Our development costs to complete capability development of the selected tool are expressed as
 
-$$\text{Development}_{OP}\left(X_{tool}\right)=\text{manyrs}_{OP}\left(X_{tool}\right)\ast\left(5M/\text{manyear}\right)$$
+$$
+\begin{aligned}
+    \text{Development}_{OP}\left(X_{tool}\right)=\text{manyrs}_{OP}\left(X_{tool}\right)\ast\left(5M/\text{manyear}\right)
+\end{aligned}
+$$
 
 #### Maintenance cost
 
 We note that Tool A will need to be maintained an additional 5 years at 10 “seats” if it is not selected at a cost of \$17.5M, so we will include the following in the completed value function
 
-$$\text{Maintain}\left(X_{tool}\right) =  I\left(X_{tool}\neq \text{Tool A}  \right) \ast 17.5M$$
+$$
+\begin{aligned}
+    \text{Maintain}\left(X_{tool}\right) =  I\left(X_{tool}\neq \text{Tool A}  \right) \ast 17.5M
+\end{aligned}
+$$
 
 Where $\ I\left(X_{tool}\neq T o o l\ A\right)$ is the identity function (value of 1 if Tool A is not selected, and 0 otherwise) to quantify the cost for 5-year maintenance of Tool A.
 
@@ -199,7 +223,11 @@ Where $\ I\left(X_{tool}\neq T o o l\ A\right)$ is the identity function (value 
 
 If development is improperly resourced and takes more than three years, the company will not be in compliance with new contracts and will incur a \$100M penalty per year. To account for this, we use the time calculations from above as inputs to the penalty function. Note, this penalty is essentially a parameter that can be adjusted based on the number of resources available to allocate to the tasks.
 
-$$\text{Penalty}(\left(t_{1i},t_2\right)\ =\$100M\ast I\left(\sum_{i\ \in a t t e m p t s} t_{1i}+t_2\geq3\right))$$
+$$
+\begin{aligned}
+    \text{Penalty}(\left(t_{1i},t_2\right)\ =\$100M\ast I\left(\sum_{i\ \in a t t e m p t s} t_{1i}+t_2\geq3\right))
+\end{aligned}
+$$
 
 Where $I\left(\sum_{i\ \in a t t e m p t s} t_{1i}+t_2\geq3\right)$ is the identity function (value of 1 for $\sum_{i\ \in a t t e m p t s} t_{1i}+t_2\geq3$, and 0 otherwise) to quantify the cost penalty of running past the 3-year window to demonstrate MBSE compliance.  The term $\sum_{i\ \in a t t e m p t s} t_{1i}$ represents the sum of time allocated for all unsuccessful attempts and the successful attempt at MBSE development.
 
@@ -207,8 +235,17 @@ Where $I\left(\sum_{i\ \in a t t e m p t s} t_{1i}+t_2\geq3\right)$ is the ident
 
 The value function combines the above costs to determine the value for selecting an alternative
 
-$$\text{Cost}\left(X_{tool}\right)=\ \text{Development}_{MBSE}\left(X_{tool}\right)\ +\ \text{Development}_{OP}\left(X_{tool}\right)\ +\ \text{Quote}\left(X_{tool}\right)\ \ast\ 10yrs$$
-$$\ +\ \text{Maintain}\left(X_{tool}\right)+\text{Penalty}(\left(t_{1i},t_2\right)$$
+$$
+\begin{aligned}
+    \text{Cost}\left(X_{tool}\right)=\ \text{Development}_{MBSE}\left(X_{tool}\right)\ +\ \text{Development}_{OP}\left(X_{tool}\right)\ 
+\end{aligned}
+$$
+
+$$
+\begin{aligned}
+    +\ \text{Quote}\left(X_{tool}\right)\ \ast\ 10yrs +\ \text{Maintain}\left(X_{tool}\right)+\text{Penalty}(\left(t_{1i},t_2\right)
+\end{aligned}
+$$
 
 This will allow us to calculate the cost values of our alternatives when characterizing our decision analysis.
 
@@ -220,8 +257,11 @@ For simplicity, over 10 years projected revenue of contract awards is \$10,000M.
 
 In total then, our value (profit) can be expressed as the following.
 
-$$\text{Profit}\left(X_{tool}\right)=\ \$10000\ -\ \text{Cost}\left(X_{tool}\right)\ \ $$
-
+$$
+\begin{aligned}
+    \text{Profit}\left(X_{tool}\right)=\ \$10000\ -\ \text{Cost}\left(X_{tool}\right)\ \ 
+\end{aligned}
+$$
 
 ## Decision Analysis
 

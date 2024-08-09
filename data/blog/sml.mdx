@@ -539,7 +539,11 @@ Dimensions of the data will be expressed in terms of the number of features (pre
 of observations $n$. A training or test data matrix, for example, will have dimensions $n \times p$, and a response array will have dimensions $n \times 1$.
 + “Test Error” and “Train Error” describe the misclassification rates for model predictions against the true response. Misclassification rate is defined as
 
-$$\frac{1}{n} \sum^{n}_{i=1}|y_{i}-\hat{y_{i}}|$$
+$$
+\begin{aligned}
+    \frac{1}{n} \sum^{n}_{i=1}|y_{i}-\hat{y_{i}}|
+\end{aligned}
+$$
 
 
 Where $y_i$ is the training or test response data and $\hat{y_{i}}$ is the predicted response data.

@@ -86,7 +86,11 @@ Each of 8 runs (completely randomized) is performed to complete 1 replicate. As 
 #### $2^3$ Factorial Model
 The model used for this experiment for the $2^{3}$ factorial model with blocked replicates is the following.
 
-$$y_{ijkm}=A_{i}+B_{j}+C_{k}+(AB)_{ij}+(AC)_{ik}+(BC)_{jk}+(ABC)_{ijk}+\delta_{m}+\epsilon_{ijkm}$$
+$$
+\begin{aligned}
+    y_{ijkm}=A_{i}+B_{j}+C_{k}+(AB)_{ij}+(AC)_{ik}+(BC)_{jk}+(ABC)_{ijk}+\delta_{m}+\epsilon_{ijkm}
+\end{aligned}
+$$
 $\begin{cases}
     i=1,2 \\
     j=1,2 \\
@@ -97,15 +101,31 @@ $\begin{cases}
 #### Hypothesis Testing
 The hypotheses to be tested will be as follows.
 
-$$H_{0}	:A_{1}=A_{2}=0$$
+$$
+\begin{aligned}
+    H_{0}	:A_{1}=A_{2}=0
+\end{aligned}
+$$
 
-$$H_{1}	:\text{ at least one of } A_{1}\text{ or }A_{2}\neq0$$
+$$
+\begin{aligned}
+    H_{1}	:\text{ at least one of } A_{1}\text{ or }A_{2}\neq0
+\end{aligned}
+$$
 
 And similar hypotheses for factors B and C.
 
-$$H_{0}	:(AB)_{ij}=0\,\,\text{ for all } i,j$$
+$$
+\begin{aligned}
+    H_{0}	:(AB)_{ij}=0\,\,\text{ for all } i,j
+\end{aligned}
+$$
 
-$$H_{1}	:\text{at least one of }(AB)_{ij}\neq0$$
+$$
+\begin{aligned}
+    H_{1}	:\text{at least one of }(AB)_{ij}\neq0
+\end{aligned}
+$$
 
 
 And similar hypotheses are extended for interactions $(AC)_{ik}$, $(BC)_{jk}$, and $(ABC)_{ijk}$.
@@ -114,14 +134,31 @@ And similar hypotheses are extended for interactions $(AC)_{ik}$, $(BC)_{jk}$, a
 
 Factors are **fixed** (factors were selected and controlled in the experiment), so
 
-$$A_{1}+A_{2}=0\text{, }B_{1}+B_{2}=0\text{, }C_{1}+C_{2}=0$$
+$$
+\begin{aligned}
+    A_{1}+A_{2}=0\text{, }B_{1}+B_{2}=0\text{, }C_{1}+C_{2}=0
+\end{aligned}
+$$
 
-$$\sum_{i=1}^{2}(AB)_{ij}=\sum_{j=1}^{2}(AB)_{ij}=0\text{, }\sum_{i=1}^{2}(AC)_{ik}=\sum_{k=1}^{2}(AC)_{ik}=0\text{, }\sum_{j=1}^{2}(BC)_{jk}=\sum_{k=1}^{2}(BC)_{jk}=0$$
+$$
+\begin{aligned}
+    \sum_{i=1}^{2}(AB)_{ij}=\sum_{j=1}^{2}(AB)_{ij}=0\text{, }\sum_{i=1}^{2}(AC)_{ik}=\sum_{k=1}^{2}(AC)_{ik}=0\text{, }\sum_{j=1}^{2}(BC)_{jk}=\sum_{k=1}^{2}(BC)_{jk}=0
+\end{aligned}
+$$
 
-$$\sum_{i=1}^{2}(ABC)_{ijk}=\sum_{j=1}^{2}(ABC)_{ijk}=\sum_{k=1}^{2}(ABC)_{ijk}=0$$
+$$
+\begin{aligned}
+    \sum_{i=1}^{2}(ABC)_{ijk}=\sum_{j=1}^{2}(ABC)_{ijk}=\sum_{k=1}^{2}(ABC)_{ijk}=0
+\end{aligned}
+$$
 
 and error is normally distributed 
-$$\epsilon_{ijkm}\sim N(0,\sigma^{2})$$
+
+$$
+\begin{aligned}
+    \epsilon_{ijkm}\sim N(0,\sigma^{2})
+\end{aligned}
+$$
 
 #### Design Matrix
 
