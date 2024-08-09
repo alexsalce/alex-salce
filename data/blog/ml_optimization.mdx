@@ -49,7 +49,11 @@ The goal in machine learning optimization is to "train" model parameters for a m
 
 We are interested in training a model using $n$ data samples with $p$ features and known outputs for each data sample. The model we will use as an example is a simple linear system.
 
-$$A\boldsymbol{\theta}=\boldsymbol{b}$$
+$$
+\begin{aligned}
+    A\boldsymbol{\theta}=\boldsymbol{b}
+\end{aligned}
+$$
 
 Matrix $A \in \mathbb{R}^{n \times p}$ represents our data, and $\boldsymbol{b} \in \mathbb{R}^{n \times 1}$ is the response vector with entries $b_i$ corresponding to the known output of each row of data $a_i \in A$, $i \in 1,...,n$.  Our model uses a vector of parameters $\theta_j \in \boldsymbol{\theta}$, $j \in 1,...,p$, where $\boldsymbol{\theta} \in \mathbb{R}^{p \times 1}$. This is a linear model, where the product $A\boldsymbol{\theta}$ should ideally produce exactly $b$. 
 
@@ -63,13 +67,21 @@ To do so, we aim to minimize a quantity we call the "loss" of the model; a measu
 
 A common loss function $f$ that we see in machine learning is a simple least-squares regression fit, where $f(\boldsymbol{\theta})$ is the following.
 
-$$f(\boldsymbol{\theta}) = ||A\boldsymbol{\theta}-\boldsymbol{b}||^{2}$$
+$$
+\begin{aligned}
+    f(\boldsymbol{\theta}) = ||A\boldsymbol{\theta}-\boldsymbol{b}||^{2}
+\end{aligned}
+$$
 
 Here, $A\boldsymbol{\theta}$ generates a vector of predictions, and the loss function $f$ calculates the squared Euclidian distance between the prediction vector $A\boldsymbol{\theta}$ and the true labels vector $\boldsymbol{b}$. 
 
 Our optimized model with our "trained parameters" satisfies the following.
 
-$$\boldsymbol{\theta}^{*}\in\underset{\boldsymbol{\theta}}{\text{min}}||A\boldsymbol{\theta}-\boldsymbol{b}||^{2}$$
+$$
+\begin{aligned}
+    \boldsymbol{\theta}^{*}\in\underset{\boldsymbol{\theta}}{\text{min}}||A\boldsymbol{\theta}-\boldsymbol{b}||^{2}
+\end{aligned}
+$$
 
 #### Gradient Descent in Machine Learning
 
@@ -89,7 +101,12 @@ So, if we start with some initial parameters $\boldsymbol{\theta_0}$, we can sub
 
 Since we likely will not arrive at the solution after one step, we can use the resulting weights $\boldsymbol{\theta_1}$ and evaluate $\nabla f(\boldsymbol{\theta_1})$ to continue and take another step. We continue onward by recursively plugging parameter values back into the algorithm and in general after $t$ steps, we have the gradient descent algorithm.
 
-$$\theta_{t+1}=\theta_{t}-\alpha \nabla f(\theta_{t})$$
+
+$$
+\begin{aligned}
+    \theta_{t+1}=\theta_{t}-\alpha \nabla f(\theta_{t})
+\end{aligned}
+$$
 
 The algorithm iterates over discrete timesteps $t$, stepping toward the minimum of $f(\theta_t)$ proportional to the learning rate $\alpha$.
 
@@ -133,13 +150,25 @@ Regular gradient descent works well for a very simple example like this (small s
 
 We turn our attention to the gradient calculation itself, and consider a gradient calculation at timestep $t$, $\nabla f(\theta_t)$ for $\theta_t \in \mathbb{R}^{p \times 1}$ for a dataset with $p$ features and $n$ samples. At each timestep, we are computing the *full* gradient. It is helpful to write out what the gradient calculation really looks like for our least square loss example.
 
-$$\nabla f (\boldsymbol{\theta_t}) = \frac{1}{n}\sum_{i=1}^{n}{\nabla f_i(\boldsymbol{\theta_t})}$$
+$$
+\begin{aligned}
+    \nabla f (\boldsymbol{\theta_t}) = \frac{1}{n}\sum_{i=1}^{n}{\nabla f_i(\boldsymbol{\theta_t})}
+\end{aligned}
+$$
 
-$$\nabla f_i (\boldsymbol{\theta_t}) = \frac{d}{d\theta} (||a_i\boldsymbol{\theta_t}-b_i||^{2})$$
+$$
+\begin{aligned}
+    \nabla f_i (\boldsymbol{\theta_t}) = \frac{d}{d\theta} (||a_i\boldsymbol{\theta_t}-b_i||^{2})
+\end{aligned}
+$$
 
 In terms of complexity, each step has $p \cdot n$ calculations per step. It can be shown that since $f$ is convex and Lipschitz continuous, for $\alpha$ selected carefully using what is called the Lipschitz constant $L$ ([you can learn more about Lipschitz continuity here](https://www.youtube.com/watch?v=UjvFFXakMks&t=418s)), that after $T$ iterations the following will hold.
 
-$$f(\theta_T)-f(\theta^*) \leq \frac{L}{2T} ||\theta_0 - \theta^*|| \text{ for } T \geq 1$$
+$$
+\begin{aligned}
+    f(\theta_T)-f(\theta^*) \leq \frac{L}{2T} ||\theta_0 - \theta^*|| \text{ for } T \geq 1
+\end{aligned}
+$$
 
 Where $\theta^*$ is the true optimal solution ($\boldsymbol\theta^* = \left[\begin{array}{c}
 2\\
@@ -178,15 +207,27 @@ So, we would like to show that this randomly sampled gradient is a valid estimat
 
 For stochastic descent, we want to consider the following problem, minimizing the average of functions, where $f$ is our objective function, a function of our model parameters $\theta$.
 
-$$ \underset{\boldsymbol{\theta}}{\text{min}f(\boldsymbol{\theta})}\overset{\Delta}{=}\frac{1}{n}\sum_{i=1}^{n}{f_{i}(\boldsymbol{\theta})} $$
+$$
+\begin{aligned}
+    \underset{\boldsymbol{\theta}}{\text{min}f(\boldsymbol{\theta})}\overset{\Delta}{=}\frac{1}{n}\sum_{i=1}^{n}{f_{i}(\boldsymbol{\theta})} 
+\end{aligned}
+$$
 
 Taking the gradient of this objective function $f$ gives
 
-$$ \nabla f(\boldsymbol{\theta}) = \frac{1}{n}\sum_{i=1}^{n}{\nabla f_{i}(\boldsymbol{\theta})} $$
+$$
+\begin{aligned}
+    \nabla f(\boldsymbol{\theta}) = \frac{1}{n}\sum_{i=1}^{n}{\nabla f_{i}(\boldsymbol{\theta})}
+\end{aligned}
+$$
 
 Stochastic gradient descent (SGD) is defined as the following.
 
-$$\boldsymbol{\theta}_{k+1}=\boldsymbol{\theta}_{k}-\alpha_{k} \nabla f_{i_{k}}(\boldsymbol{\theta}_{k})$$
+$$
+\begin{aligned}
+    \boldsymbol{\theta}_{k+1}=\boldsymbol{\theta}_{k}-\alpha_{k} \nabla f_{i_{k}}(\boldsymbol{\theta}_{k})
+\end{aligned}
+$$
 
 where $i_{k} \in \{1,...,n\}$ is an index chosen uniformly at random for an iteration $k$. 
 
@@ -194,7 +235,11 @@ where $i_{k} \in \{1,...,n\}$ is an index chosen uniformly at random for an iter
 
 We want to determine whether $\nabla f_{i_{k}}(\boldsymbol{\theta}_{k})$ is a valid estimator for the true gradient $\nabla f(\boldsymbol{\theta}_{k})$, so we are interested in its expectation. Since $i_k$ is selected uniformly at random, the following expectation holds.
 
-$$ \mathbb{E}[\nabla f_{i_{k}}(\boldsymbol{\theta}_{k})] = \sum_{i=1}^{n}{P(i=i_{k}) \nabla f_{i_{k}}(\boldsymbol{\theta}_{k})} = \frac{1}{n} \sum_{i=1}^{n}{ \nabla f_{i_{k}}(\boldsymbol{\theta}_{k})} = \nabla f(\boldsymbol{\theta}_{k}) $$
+$$
+\begin{aligned}
+    \mathbb{E}[\nabla f_{i_{k}}(\boldsymbol{\theta}_{k})] = \sum_{i=1}^{n}{P(i=i_{k}) \nabla f_{i_{k}}(\boldsymbol{\theta}_{k})} = \frac{1}{n} \sum_{i=1}^{n}{ \nabla f_{i_{k}}(\boldsymbol{\theta}_{k})} = \nabla f(\boldsymbol{\theta}_{k}) 
+\end{aligned}
+$$
 
 So, an individual gradient is an unbiased estimator for the full gradient, a fundamental principle to stochastic gradient descent.
 
@@ -211,21 +256,37 @@ The inexactness of the steps that we have now introduced to gradient descent is 
 
 An analysis of convergence of SGD reveals how we quantify the variance in the algorithm's steps. The SGD algorithm can be rewritten as the following.
 
-$$ \boldsymbol{\theta}_{k+1}=\boldsymbol{\theta}_{k}-\alpha_{k} [\nabla f(\boldsymbol{\theta}_{k})-\underset{w_{k}}{\underbrace{(\nabla f(\boldsymbol{\theta}_{k})-\nabla f_{i_{k}}(\boldsymbol{\theta}_{k}))}}] $$
+$$
+\begin{aligned}
+    \boldsymbol{\theta}_{k+1}=\boldsymbol{\theta}_{k}-\alpha_{k} [\nabla f(\boldsymbol{\theta}_{k})-\underset{w_{k}}{\underbrace{(\nabla f(\boldsymbol{\theta}_{k})-\nabla f_{i_{k}}(\boldsymbol{\theta}_{k}))}}] 
+\end{aligned}
+$$
 
  We assume $f$ is convex and that $\nabla f$ is Lipschitz continuous.  First, we define $\boldsymbol{w_{k}} \overset{\Delta}{=} \nabla f(\boldsymbol{\theta_{k}}) - \nabla f_{i_{k}}(\boldsymbol{\theta_{k}})$. $\boldsymbol{w_{k}}$ quantifies the error between the full gradient and a stochastic gradient at iteration $k$. 
  
  Next, we take the conditional expectiation of $\boldsymbol{w_{k}}$ given parameters $\boldsymbol{\theta_{k}}$,
 
- $$ \mathbb{E} [\boldsymbol{w_{k}} | \boldsymbol{\theta_{k}}] = \mathbb{E} [ \nabla f(\boldsymbol{\theta_{k}}) - \nabla f_{i_{k}}(\boldsymbol{\theta_{k}}) | \boldsymbol{\theta_{k}}] =  \nabla f(\boldsymbol{\theta_{k}}) - \underset{\nabla f (\boldsymbol \theta_{k})}{\underbrace{\mathbb{E} [\nabla f_{i_{k}}(\boldsymbol{\theta_{k}}) | \boldsymbol{\theta_{k}}]}} = 0  $$
+$$
+\begin{aligned}
+    \mathbb{E} [\boldsymbol{w_{k}} | \boldsymbol{\theta_{k}}] = \mathbb{E} [ \nabla f(\boldsymbol{\theta_{k}}) - \nabla f_{i_{k}}(\boldsymbol{\theta_{k}}) | \boldsymbol{\theta_{k}}] =  \nabla f(\boldsymbol{\theta_{k}}) - \underset{\nabla f (\boldsymbol \theta_{k})}{\underbrace{\mathbb{E} [\nabla f_{i_{k}}(\boldsymbol{\theta_{k}}) | \boldsymbol{\theta_{k}}]}} = 0  
+\end{aligned}
+$$
 
  We establish $\boldsymbol{w_{k}}$ is conditionally unbiased as an assumption. Now we take the conditional variance and use the conditional unbiasedness assumption for the following.
 
- $$ \text{Var}(\boldsymbol{w_{k}} | \boldsymbol{\theta_{k}}) = \mathbb{E} [\boldsymbol{w_{k}} \boldsymbol{w_{k}}^T | \boldsymbol{\theta_{k}}] - \underset{=0}{\underbrace{\mathbb{E} [\boldsymbol{w_{k}} | \boldsymbol{\theta_{k}}]^2 }} $$
+ $$
+\begin{aligned}
+    \text{Var}(\boldsymbol{w_{k}} | \boldsymbol{\theta_{k}}) = \mathbb{E} [\boldsymbol{w_{k}} \boldsymbol{w_{k}}^T | \boldsymbol{\theta_{k}}] - \underset{=0}{\underbrace{\mathbb{E} [\boldsymbol{w_{k}} | \boldsymbol{\theta_{k}}]^2 }} 
+\end{aligned}
+$$
 
  We can now use the [Cauchy-Schwarz Inequality](https://en.wikipedia.org/wiki/Cauchy%E2%80%93Schwarz_inequality) to show
 
- $$ || \text{Var}(\boldsymbol{w_{k}} | \boldsymbol{\theta_{k}}) || \leq \mathbb{E} [||\boldsymbol{w_{k}}||^2 | \boldsymbol{\theta_{k}} ] \leq \sigma^2 $$
+ $$
+\begin{aligned}
+    || \text{Var}(\boldsymbol{w_{k}} | \boldsymbol{\theta_{k}}) || \leq \mathbb{E} [||\boldsymbol{w_{k}}||^2 | \boldsymbol{\theta_{k}} ] \leq \sigma^2 
+\end{aligned}
+$$
 
 So our conditional variance must be bounded by some constant variance $\sigma^2$. 
 
@@ -233,7 +294,11 @@ Next, we want to observe a sequence of $\boldsymbol{\theta_{k}}$ generated by SG
 
 Under these assumptions, we show the following convergence for SGD.
 
-$$ \mathbb{E}[f(\bar{\boldsymbol{\theta}}_T)-f(\boldsymbol{\theta}^*)] \leq \frac{1}{2 \alpha_k T}|| \boldsymbol{\theta_0} - \boldsymbol{\theta^*} ||^2 + \alpha_k \sigma^2 $$
+$$
+\begin{aligned}
+    \mathbb{E}[f(\bar{\boldsymbol{\theta}}_T)-f(\boldsymbol{\theta}^*)] \leq \frac{1}{2 \alpha_k T}|| \boldsymbol{\theta_0} - \boldsymbol{\theta^*} ||^2 + \alpha_k \sigma^2 
+\end{aligned}
+$$
 
 If we select $\alpha_k = \frac{1}{\sqrt{T}}$, we achieve a convergence rate of $\mathcal{O}(\frac{1}{\sqrt{T}})$, which is an improvement over regular gradient descent. Note here, $\alpha_k$ decays as we step, so the algorithm "slows down" as we proceed. The variance in the steps requires that our learning rate decays, which is generally undesirable.
 
@@ -263,7 +328,11 @@ Part of our due diligence in statistics is to analyze the quality of an esimator
 
 MSE is a quantity defined as the expected value of the square difference between the parameter estimate and the true parameter value. Skipping some steps in between, it can be decomposed into both a variance component and a bias component ([a link to a helpful video about MSE](https://www.youtube.com/watch?v=lET4uQLpmM0)).
 
-$$ \text{MSE}(\hat{\boldsymbol{\theta}}) = \mathbb{E}_{\theta}[(\hat{\boldsymbol{\theta}}-\boldsymbol{\theta})^2] = \text{Bias}(\hat{\boldsymbol{\theta}})^2 + \text{Var}(\hat{\boldsymbol{\theta}}) $$
+$$
+\begin{aligned}
+    \text{MSE}(\hat{\boldsymbol{\theta}}) = \mathbb{E}_{\theta}[(\hat{\boldsymbol{\theta}}-\boldsymbol{\theta})^2] = \text{Bias}(\hat{\boldsymbol{\theta}})^2 + \text{Var}(\hat{\boldsymbol{\theta}})
+\end{aligned}
+$$
 
 In statistics, we often measure the quality of an estimator by whether it is both *unbiased* and *consistent*. We won't dive into consistency of estimators further here ([see appendix for some detail](#consistency)), but we do want to take note that in general, unbiased estimators are preferred estimators to those that are biased in some way. In terms of MSE, if our estimator is unbiased, then its MSE is equal to its variance. 
 
@@ -273,9 +342,18 @@ For example, we assume our conditional estimator of the approximation error for 
 
 We showed $\text{Var}(\boldsymbol{w_{k}} | \boldsymbol{\theta_{k}}) = \mathbb{E} [\boldsymbol{w_{k}} \boldsymbol{w_{k}}^T | \boldsymbol{\theta_{k}}] \leq \mathbb{E} [||\boldsymbol{w_{k}}||^2 | \boldsymbol{\theta_{k}}]$, so the MSE of $\boldsymbol{w_{k}} | \boldsymbol{\theta_{k}}$, the estimate of stochastic gradient estimation error for a given $\boldsymbol{\theta_{k}}$, is the following.
 
-$$ \text{MSE}(\boldsymbol{w_{k}} | \boldsymbol{\theta_{k}}) = \mathbb{E} [\boldsymbol{w_{k}} \boldsymbol{w_{k}}^T | \boldsymbol{\theta_{k}}] $$
+$$
+\begin{aligned}
+    \text{MSE}(\boldsymbol{w_{k}} | \boldsymbol{\theta_{k}}) = \mathbb{E} [\boldsymbol{w_{k}} \boldsymbol{w_{k}}^T | \boldsymbol{\theta_{k}}] 
+\end{aligned}
+$$
 which is bounded by a constant variance term.
-$$ || \text{MSE}(\boldsymbol{w_{k}} | \boldsymbol{\theta_{k}}) || \leq \sigma^2$$
+
+$$
+\begin{aligned}
+    || \text{MSE}(\boldsymbol{w_{k}} | \boldsymbol{\theta_{k}}) || \leq \sigma^2
+\end{aligned}
+$$
 
 It is important to be cognizant of MSE as the measure for error of an estimator rather than just the variance. We don't just care about variance -- bias is a nontrivial and undesirable quantity if we are not careful. 
 
@@ -288,16 +366,28 @@ Since variance in the algorithm's steps is a consequence of using estimates of t
 
 Minibatches are an important variance-reduction technique that are commonly seen in the class of gradient descent algorithms. Rather than sampling random *individual* gradients from the full gradient at each step, we can improve our gradient approximation by sampling a random subset $I_k \subset \{ 1,...,n \}$ where $|I_k|=b < < n$ and modify the SGD algorithm to average the "minibatches".
 
-$$\boldsymbol{\theta}_{k+1}=\boldsymbol{\theta}_{k}- \frac{\alpha_{k}}{b} \underset{i \in I_k}{\sum} \nabla f_{i_{k}}(\boldsymbol{\theta}_{k})$$
+$$
+\begin{aligned}
+    \boldsymbol{\theta}_{k+1}=\boldsymbol{\theta}_{k}- \frac{\alpha_{k}}{b} \underset{i \in I_k}{\sum} \nabla f_{i_{k}}(\boldsymbol{\theta}_{k})
+\end{aligned}
+$$
 
 IMAGE OF RANDOM SAMPLE MATRIX HIGHLIGHT THING
 
 We first take the conditional expectation modified from SGD. Note, as with SGD the gradient estimate is unbiased $E[\frac{1}{b} \underset{i \in I_k}{\sum} \nabla f_{i_{k}}(\boldsymbol{\theta}_{k})] = \nabla f(\boldsymbol{\theta}_{k})$.
 
-$$ || \text{MSE}(\boldsymbol{w_{k}} | \boldsymbol{\theta_{k}}) || = \mathbb{E}[||\boldsymbol{w_k}||^2 | \boldsymbol{\theta_k}] = \mathbb{E}[|| \frac{1}{b} \underset{i \in I_k}{\sum} (\nabla f_{i_{k}}(\boldsymbol{\theta}_{k}) - \nabla f(\boldsymbol{\theta}_{k})) ||^2 | \boldsymbol{\theta_k}]$$
+$$
+\begin{aligned}
+    || \text{MSE}(\boldsymbol{w_{k}} | \boldsymbol{\theta_{k}}) || = \mathbb{E}[||\boldsymbol{w_k}||^2 | \boldsymbol{\theta_k}] = \mathbb{E}[|| \frac{1}{b} \underset{i \in I_k}{\sum} (\nabla f_{i_{k}}(\boldsymbol{\theta}_{k}) - \nabla f(\boldsymbol{\theta}_{k})) ||^2 | \boldsymbol{\theta_k}]
+\end{aligned}
+$$
 
 
-$$ \leq \frac{1}{b^2} \cdot b \underset{i \in I_k}{\sum} \mathbb{E}[ || (\nabla f_{i_{k}}(\boldsymbol{\theta}_{k}) - \nabla f(\boldsymbol{\theta}_{k})) ||^2 | \boldsymbol{\theta_k} ] \leq \frac{\sigma^2}{b} $$
+$$
+\begin{aligned}
+    \leq \frac{1}{b^2} \cdot b \underset{i \in I_k}{\sum} \mathbb{E}[ || (\nabla f_{i_{k}}(\boldsymbol{\theta}_{k}) - \nabla f(\boldsymbol{\theta}_{k})) ||^2 | \boldsymbol{\theta_k} ] \leq \frac{\sigma^2}{b}
+\end{aligned}
+$$
 
 *Note that the above calculation uses the identity $||\overset{n}{\underset{i=1}{\sum}} a_i||^2 \leq  \overset{n}{\underset{i=1}{\sum}} ||a_i||^2$ to derive inequality.*
 
@@ -315,7 +405,11 @@ SAG and SAGA utilize important variance reduction techniques and are often treat
 
 The framework for SAG uses gradient descent in the following form, taking the average gradient at each iteration.
 
-$$\boldsymbol{\theta}_{k+1}=\boldsymbol{\theta}_{k}- \frac{\alpha}{n} \sum_{i=1}^{n}{g_k^{(i)}} $$
+$$
+\begin{aligned}
+    \boldsymbol{\theta}_{k+1}=\boldsymbol{\theta}_{k}- \frac{\alpha}{n} \sum_{i=1}^{n}{g_k^{(i)}}
+\end{aligned}
+$$
 
 where $g_k^{(i)} = \nabla f_i(\boldsymbol{\theta}_{k})$.
 
@@ -327,34 +421,67 @@ We first initialize $\boldsymbol{\theta}_{0}$ and set $g=0$ and $g^{(i)}=0$ for 
 
 At each step $k=1,2,3...$ we select $i_k \in \{1,...,n \}$ uniformly at random and update our individual gradient, keeping all other values of $g_k^{(i)}$ the same.
 
-$$g_{k}^{(i)} = \begin{cases} \nabla f_{i}(\boldsymbol{\theta}_{k-1}) & i=k\\ g_{k-1}^{(i)} & i\neq i_{k} \end{cases}$$
+$$
+\begin{aligned}
+    g_{k}^{(i)} = \begin{cases} \nabla f_{i}(\boldsymbol{\theta}_{k-1}) & i=k\\ g_{k-1}^{(i)} & i\neq i_{k} \end{cases}
+\end{aligned}
+$$
 
 We then perform the per iteration update.
 
-$$\boldsymbol{\theta}_{k}=\boldsymbol{\theta}_{k-1}- \alpha \left ( \frac{1}{n} \sum_{i=1}^{n}{g_k^{(i)}} \right ) $$
+$$
+\begin{aligned}
+    \boldsymbol{\theta}_{k}=\boldsymbol{\theta}_{k-1}- \alpha \left ( \frac{1}{n} \sum_{i=1}^{n}{g_k^{(i)}} \right ) 
+\end{aligned}
+$$
 
 We now have a new estimator for the gradient which we will call $\hat{g}$, which can be written as the following.
 
-$$ \hat{g} = \frac{1}{n} \left( g_k^{(i_k)} - g_{k-1}^{(i_k)}  \right) + \frac{1}{n} \sum_{i=1}^{n}{g_{k-1}^{(i)}} $$
+$$
+\begin{aligned}
+    \hat{g} = \frac{1}{n} \left( g_k^{(i_k)} - g_{k-1}^{(i_k)}  \right) + \frac{1}{n} \sum_{i=1}^{n}{g_{k-1}^{(i)}} 
+\end{aligned}
+$$
 
 If we set $X = g_{k}^{(i_k)}$ and $Y = g_{k-1}^{(i_k)}$, noting that $\mathbb{E}[Y] = \frac{1}{n} \overset{n}{\underset{i=1}{\sum}}{g_{k-1}^{(i)}}$, $\hat{g}$ can be rewritten as the following.
 
-$$ \hat{g} = \frac{1}{n} \left( X - Y \right) + \mathbb{E}[Y] $$
+$$
+\begin{aligned}
+    \hat{g} = \frac{1}{n} \left( X - Y \right) + \mathbb{E}[Y]
+\end{aligned}
+$$
 
 As with our previous analysis of estimators, we take the expectation of $\hat{g}$,
 
-$$ \mathbb{E}[\hat{g}] = \frac{1}{n} \left( \mathbb{E}[X] - \mathbb{E}[Y] \right) + \mathbb{E}[Y] $$
-$$ = \frac{1}{n} \mathbb{E}[X] - (1-\frac{1}{n})\mathbb{E}[Y] \neq 0 $$
+$$
+\begin{aligned}
+    \mathbb{E}[\hat{g}] = \frac{1}{n} \left( \mathbb{E}[X] - \mathbb{E}[Y] \right) + \mathbb{E}[Y]
+\end{aligned}
+$$
+
+$$
+\begin{aligned}
+    = \frac{1}{n} \mathbb{E}[X] - (1-\frac{1}{n})\mathbb{E}[Y] \neq 0 
+\end{aligned}
+$$
 
 Our expectation for our estimator is nonzero, so our gradient estimator $\hat{g}$ is biased!
 
 Omitting the details, SAG can be shown to converge under our usual convexity and Lipschitz continuity for the gradient per the following. For $\alpha = \frac{1}{16L}$ and and the intialization,
 
-$$ g_{0}^{(i)} = \nabla f_i(\boldsymbol{\theta}_{0}) - \nabla f(\boldsymbol{\theta}_{0}) \text{,  } i=1,...,n$$
+$$
+\begin{aligned}
+    g_{0}^{(i)} = \nabla f_i(\boldsymbol{\theta}_{0}) - \nabla f(\boldsymbol{\theta}_{0}) \text{,  } i=1,...,n
+\end{aligned}
+$$
 
 we achieve the following convergence.
 
-$$  \mathbb{E}[f(\bar{\boldsymbol{\theta}}_T)-f(\boldsymbol{\theta}^*)] \leq \frac{48n}{T} \left( f(\boldsymbol{\theta_0}) - f(\boldsymbol{\theta^*}) \right) + \frac{128L}{T}|| \boldsymbol{\theta_0} - \boldsymbol{\theta^*} ||^2 $$
+$$
+\begin{aligned}
+    \mathbb{E}[f(\bar{\boldsymbol{\theta}}_T)-f(\boldsymbol{\theta}^*)] \leq \frac{48n}{T} \left( f(\boldsymbol{\theta_0}) - f(\boldsymbol{\theta^*}) \right) + \frac{128L}{T}|| \boldsymbol{\theta_0} - \boldsymbol{\theta^*} ||^2
+\end{aligned}
+$$
 
 Comparing directly to SGD:
 
@@ -370,17 +497,29 @@ The SAGA algorithm is only a slightly modified version of SAG, with the only dif
 
 Instead, however, of the SAG gradient estimate $\hat{g} = \frac{1}{n} \left( g_k^{(i_k)} - g_{k-1}^{(i_k)}  \right) + \frac{1}{n} \sum_{i=1}^{n}{g_{k-1}^{(i)}}$, we use the following gradient estimate for SAGA.
 
-$$ \hat{g} = g_k^{(i_k)} - g_{k-1}^{(i_k)} + \frac{1}{n} \sum_{i=1}^{n}{g_{k-1}^{(i)}}  $$
+$$
+\begin{aligned}
+    \hat{g} = g_k^{(i_k)} - g_{k-1}^{(i_k)} + \frac{1}{n} \sum_{i=1}^{n}{g_{k-1}^{(i)}}
+\end{aligned}
+$$
 
 So, our per iteration updates are of the following form.
 
-$$ \boldsymbol{\theta}_{k}=\boldsymbol{\theta}_{k-1}- \alpha \left ( g_k^{(i_k)} - g_{k-1}^{(i_k)} + \frac{1}{n} \sum_{i=1}^{n}{g_k^{(i)}} \right ) $$
+$$
+\begin{aligned}
+    \boldsymbol{\theta}_{k}=\boldsymbol{\theta}_{k-1}- \alpha \left ( g_k^{(i_k)} - g_{k-1}^{(i_k)} + \frac{1}{n} \sum_{i=1}^{n}{g_k^{(i)}} \right )
+\end{aligned}
+$$
 
 SAGA can be shown to have the same convergence $\mathcal{O}(\frac{1}{T})$, but can use a slightly better learning rate $\alpha = \frac{1}{3L}$. It also does not require the bound on conditional variance. The most stark difference with SAGA vs. SAG is that SAGA is unbiased. It still has the less than desirable need to store a gradient table.
 
 Using the same definition for random varables $X$ and $Y$ as before, we have the following.
 
-$$ E[\hat{g}] = E[X] - E[Y] + E[Y] = E[X] = \nabla f(\boldsymbol{\theta_k}) $$
+$$
+\begin{aligned}
+    E[\hat{g}] = E[X] - E[Y] + E[Y] = E[X] = \nabla f(\boldsymbol{\theta_k}) 
+\end{aligned}
+$$
 
 So, $\hat{g}$ is an unbiased estimator for the gradient and it follows that the bias term $E[w_k | \boldsymbol{\theta}_{k}] = 0$ for this method.
 
@@ -389,26 +528,52 @@ So, $\hat{g}$ is an unbiased estimator for the gradient and it follows that the 
 Recall the gradient estimates for each.
 
 **SAG**
-$$ \hat{g} = \frac{1}{n} \left( g_k^{(i_k)} - g_{k-1}^{(i_k)}  \right) + \frac{1}{n} \sum_{i=1}^{n}{g_{k-1}^{(i)}} $$
+
+$$
+\begin{aligned}
+    \hat{g} = \frac{1}{n} \left( g_k^{(i_k)} - g_{k-1}^{(i_k)}  \right) + \frac{1}{n} \sum_{i=1}^{n}{g_{k-1}^{(i)}}
+\end{aligned}
+$$
 
 **SAGA**
-$$ \hat{g} = g_k^{(i_k)} - g_{k-1}^{(i_k)} + \frac{1}{n} \sum_{i=1}^{n}{g_{k-1}^{(i)}}  $$
+
+$$
+\begin{aligned}
+    \hat{g} = g_k^{(i_k)} - g_{k-1}^{(i_k)} + \frac{1}{n} \sum_{i=1}^{n}{g_{k-1}^{(i)}}
+\end{aligned}
+$$
 
 For  $X = g_{k}^{(i_k)}$ and $Y = g_{k-1}^{(i_k)}$ where $X$ and $Y$ are correlated, we have the general form.
 
-$$ \hat{g}_{\alpha} = \alpha (X-Y) + \mathbb{E}[Y] $$
+$$
+\begin{aligned}
+    \hat{g}_{\alpha} = \alpha (X-Y) + \mathbb{E}[Y]
+\end{aligned}
+$$
 
 Where $\alpha = 1$ for SAGA and $\alpha = \frac{1}{n}$ for SAG.
 
 Taking the variance, we have the following.
 
-$$ Var(\hat{g}_{\alpha}) = \alpha^2 (Var[X] + Var[Y] - 2 Cov[X,Y])$$
+$$
+\begin{aligned}
+    Var(\hat{g}_{\alpha}) = \alpha^2 (Var[X] + Var[Y] - 2 Cov[X,Y])
+\end{aligned}
+$$
 
 So, we can compare the methods.
 
-$$\textbf{SAG: }Var(\hat{g}_{\alpha}) = \frac{1}{n^2} (Var[X] + Var[Y] - 2 Cov[X,Y])$$
+$$
+\begin{aligned}
+    \textbf{SAG: }Var(\hat{g}_{\alpha}) = \frac{1}{n^2} (Var[X] + Var[Y] - 2 Cov[X,Y])
+\end{aligned}
+$$
 
-$$\textbf{SAGA: }Var(\hat{g}_{\alpha}) = (Var[X] + Var[Y] - 2 Cov[X,Y])$$
+$$
+\begin{aligned}
+    \textbf{SAGA: }Var(\hat{g}_{\alpha}) = (Var[X] + Var[Y] - 2 Cov[X,Y])
+\end{aligned}
+$$
 
 SAGA's modified algorithm makes the iterations unbiased, however by doing so we increase variance in the steps. The SAG/SAGA has tradeoffs with bias and variance, but ultimately both converge at the same rate. In terms of MSE, this means we may not have an obvious advantage for either method other than the faster learning rate of SAGA.
 
@@ -441,9 +606,17 @@ All parameter updates occur within the inner loop, and the resulting parameters 
 
 We want to analyze our gradient estimate, so we take its expectation conditioned on knowledge of $\boldsymbol{\theta}_{t-1}$.
 
-$$ \mathbb{E} [v_{t-1}|\boldsymbol{\theta}_{t-1}] = \mathbb{E}[ \nabla f_{i_{t}} (\boldsymbol{\theta}_{t-1}) - \nabla f_{i_{t}} (\tilde{\boldsymbol{\theta}}) + \tilde{g} ] = \mathbb{E}[ \nabla f_{i_{t}} (\boldsymbol{\theta}_{t-1}) ] - \mathbb{E}[ \nabla f_{i_{t}} (\tilde{\boldsymbol{\theta}}) ] + \tilde{g} $$
+$$
+\begin{aligned}
+    \mathbb{E} [v_{t-1}|\boldsymbol{\theta}_{t-1}] = \mathbb{E}[ \nabla f_{i_{t}} (\boldsymbol{\theta}_{t-1}) - \nabla f_{i_{t}} (\tilde{\boldsymbol{\theta}}) + \tilde{g} ] = \mathbb{E}[ \nabla f_{i_{t}} (\boldsymbol{\theta}_{t-1}) ] - \mathbb{E}[ \nabla f_{i_{t}} (\tilde{\boldsymbol{\theta}}) ] + \tilde{g}
+\end{aligned}
+$$
 
-$$ = \underset{\nabla f (\boldsymbol{\theta}_{t-1})}{\underbrace{\frac{1}{n} \sum_{i=1}^{n}{\nabla f_{i_{t}}(\boldsymbol{\theta}_{t-1})}}} - \underset{\tilde{g}}{\underbrace{\frac{1}{n} \sum_{i=1}^{n}{\nabla f_{i_{t}} (\tilde{\boldsymbol{\theta}})}}} + \tilde{g} = \nabla f (\boldsymbol{\theta}_{t-1})$$
+$$
+\begin{aligned}
+     = \underset{\nabla f (\boldsymbol{\theta}_{t-1})}{\underbrace{\frac{1}{n} \sum_{i=1}^{n}{\nabla f_{i_{t}}(\boldsymbol{\theta}_{t-1})}}} - \underset{\tilde{g}}{\underbrace{\frac{1}{n} \sum_{i=1}^{n}{\nabla f_{i_{t}} (\tilde{\boldsymbol{\theta}})}}} + \tilde{g} = \nabla f (\boldsymbol{\theta}_{t-1})
+\end{aligned}
+$$
 
 So, the SVRG gradient estimator for the inner loop updates is *unbiased*.
 
@@ -451,11 +624,19 @@ So, the SVRG gradient estimator for the inner loop updates is *unbiased*.
 
 The variance reduction for SVRG is accomplished with the inner loops by the convergence of both $\boldsymbol{\theta}_{t}$ and $\tilde{\boldsymbol{\theta}}$ to the same optimal parameter ${\theta}^{*}$. Omitting the detailed proof ([Johnson and Zhang](https://papers.nips.cc/paper/2013/file/ac1dd209cbcc5e5d1c6e28598e8cbbe8-Paper.pdf) CITE), the following holds for convex (and strongly convex) objective functions with Lipschitz continuous gradients.
 
-$$ \tilde{g} = \frac{1}{n} \sum_{i=1}^{n}{\nabla f_{i} (\tilde{\boldsymbol{\theta}})} \underset{\tilde{\theta}\rightarrow\theta^{*}}{\rightarrow} \frac{1}{n} \sum_{i=1}^{n}{\nabla f_{i} (\boldsymbol{\theta}^*)} \rightarrow 0  $$ 
+$$
+\begin{aligned}
+    \tilde{g} = \frac{1}{n} \sum_{i=1}^{n}{\nabla f_{i} (\tilde{\boldsymbol{\theta}})} \underset{\tilde{\theta}\rightarrow\theta^{*}}{\rightarrow} \frac{1}{n} \sum_{i=1}^{n}{\nabla f_{i} (\boldsymbol{\theta}^*)} \rightarrow 0 
+\end{aligned}
+$$
 
 So if $\nabla f_{i} (\tilde{\boldsymbol{\theta}}) \rightarrow \nabla f_{i} (\boldsymbol{\theta}^*)$, then
 
-$$ v_{t-1} =  \nabla f_{i_{t}} (\boldsymbol{\theta}_{t-1}) - \nabla f_{i_{t}} (\tilde{\boldsymbol{\theta}}) + \tilde{g} \underset{\tilde{\theta}\rightarrow\theta^{*}\text{, } \theta_{t-1}\rightarrow\theta^{*}}{\rightarrow}  \nabla f_{i_{t}} (\boldsymbol{\theta}^{*}) - \nabla f_{i_{t}} (\boldsymbol{\theta}^{*})  \rightarrow 0$$
+$$
+\begin{aligned}
+    v_{t-1} =  \nabla f_{i_{t}} (\boldsymbol{\theta}_{t-1}) - \nabla f_{i_{t}} (\tilde{\boldsymbol{\theta}}) + \tilde{g} \underset{\tilde{\theta}\rightarrow\theta^{*}\text{, } \theta_{t-1}\rightarrow\theta^{*}}{\rightarrow}  \nabla f_{i_{t}} (\boldsymbol{\theta}^{*}) - \nabla f_{i_{t}} (\boldsymbol{\theta}^{*})  \rightarrow 0
+\end{aligned}
+$$
 
 This means that the variance of the gradient estimates approach zero as the parameter updates converge to the optimum $\boldsymbol{\theta}^{*}$, hence the inner loops serve as a variance reduction technique, but in order for overall variance in the steps to decrease we must update $\tilde{\boldsymbol{\theta}}$ (so that $\nabla f_{i} (\tilde{\boldsymbol{\theta}}) \rightarrow \nabla f_{i} (\boldsymbol{\theta}^*)$), meaning that we must execute additional full gradient computations (epochs). We will revisit this point in the analysis of [the variance reduction of SARAH](#sarah-variance-reduction).
 
@@ -467,11 +648,19 @@ For a [$\mu$-strongly](#convexity) convex objective function, SVRG converges to 
 
 Assume $m$ is sufficiently large such that the following holds.
 
-$$ \beta_m = \frac{1}{\mu \alpha (1-2L \alpha)m} + \frac{2L \alpha}{1-2L \alpha} < 1 $$
+$$
+\begin{aligned}
+    \beta_m = \frac{1}{\mu \alpha (1-2L \alpha)m} + \frac{2L \alpha}{1-2L \alpha} < 1
+\end{aligned}
+$$
 
 then,
 
-$$ \mathbb{E} [f(\tilde{\boldsymbol{\theta}}_s)] - f(\boldsymbol{\theta}^*) \leq \beta^s (f(\tilde{\boldsymbol{\theta}}_s) - f(\boldsymbol{\theta}^*)) $$
+$$
+\begin{aligned}
+    \mathbb{E} [f(\tilde{\boldsymbol{\theta}}_s)] - f(\boldsymbol{\theta}^*) \leq \beta^s (f(\tilde{\boldsymbol{\theta}}_s) - f(\boldsymbol{\theta}^*)) 
+\end{aligned}
+$$
 
 The complexity is $\mathcal{O}((n+\frac{L}{\mu}) \log(\frac{1}{\epsilon}))$, which is comparable to SAG/SAGA. This also gives us criteria for which to select inner loop size $m$ and learning rate $\alpha$.
 
@@ -497,9 +686,17 @@ The gradient estimate (also referred to as the "SARAH update") utilizes a simila
 
 The SARAH estimator modifies the gradient estimate by replacing the gradient esimate terms from the outer loop initialization with a recursive gradient update.
 
-$$ v_{t-1} =  \nabla f_{i_{t}} (\boldsymbol{\theta}_{t-1}) - \underset{\text{outer loop terms}}{\underbrace{ \nabla f_{i_{t}} (\tilde{\boldsymbol{\theta}}) + \tilde{g}}} $$
+$$
+\begin{aligned}
+    v_{t-1} =  \nabla f_{i_{t}} (\boldsymbol{\theta}_{t-1}) - \underset{\text{outer loop terms}}{\underbrace{ \nabla f_{i_{t}} (\tilde{\boldsymbol{\theta}}) + \tilde{g}}}
+\end{aligned}
+$$
 
-$$v_{t}=\nabla f_{i_{t}}(\theta_{t})-\nabla f_{i_{t}}(\theta_{t-1})+v_{t-1}$$
+$$
+\begin{aligned}
+    v_{t}=\nabla f_{i_{t}}(\theta_{t})-\nabla f_{i_{t}}(\theta_{t-1})+v_{t-1}
+\end{aligned}
+$$
 
 We note that there is a shift in index as we now need to use both the most recent random gradient as well as the random gradient from the previous step. This also means that we must perform one parameter update in the outer loop before we enter the inner loop.
 
@@ -507,11 +704,19 @@ Each gradient estimate uses every previous gradient estimate from the inner loop
 
 Let's take the conditional expectation of the gradient estimate, given all previous iterates of $\boldsymbol{\theta}_{t}$. We will call this $\mathcal{F}_t$, the [$\sigma$-algebra](https://en.wikipedia.org/wiki/%CE%A3-algebra) generated by the inital $\boldsymbol{\theta}_{0}$ and all subsequent randomly chosen indices for the inner loop $\mathcal{F}_t = \sigma(\boldsymbol{\theta}_{0}, i_1,...,i_{t-1})$. Note that $\mathbb{E}[v_{t}|\mathcal{F}_t] = \mathbb{E}_{i_t}[v_{t}]$.
 
-$$ \mathbb{E}_{i_t}[v_{t}] = \nabla f(\theta_{t}) - \nabla f(\theta_{t-1}) + v_{t-1} \neq \nabla f(\theta_{t})$$
+$$
+\begin{aligned}
+    \mathbb{E}_{i_t}[v_{t}] = \nabla f(\theta_{t}) - \nabla f(\theta_{t-1}) + v_{t-1} \neq \nabla f(\theta_{t})
+\end{aligned}
+$$
 
 The steps are omitted, but the result is notable as it is *not* an unbiased estimator for the gradient. However, the *total* expectation holds.
 
-$$ \mathbb{E}[v_t] = \nabla f(\theta_{t}) $$
+$$
+\begin{aligned}
+    \mathbb{E}[v_t] = \nabla f(\theta_{t})
+\end{aligned}
+$$
 
 So, an exact full pass over the data for an inner loop is unbiased.
 
@@ -523,7 +728,11 @@ In the analysis of SVRG we showed that stochastic gradients are unbiased estimat
 
 SARAH's variance bound in the $\mu$-strongly convex objective function case can be shown to be less than the variance bound of the same objective function with SVRG.
 
-$$ \sigma_{m}\stackrel{def}{=}\frac{1}{\mu\eta(m+1)}+\frac{\eta L}{2-\eta L}  <  \frac{1}{\mu\eta(1-2L\eta)m}+\frac{1}{\frac{1}{2\eta L}-1}=\beta_m $$
+$$
+\begin{aligned}
+    \sigma_{m}\stackrel{def}{=}\frac{1}{\mu\eta(m+1)}+\frac{\eta L}{2-\eta L}  <  \frac{1}{\mu\eta(1-2L\eta)m}+\frac{1}{\frac{1}{2\eta L}-1}=\beta_m
+\end{aligned}
+$$
 
 SHOW IMAGE COMPARISON OF SVRG VS SARAH, MAYBE JUST PIC FROM PAPER?
 
@@ -542,7 +751,11 @@ Comparing these rates directly to SVRG,
 
 Similar to SVRG, we must select our inner loop size $m$ and learning rate such that the following holds.
 
-$$ \sigma_{m}\stackrel{def}{=}\frac{1}{\mu\eta(m+1)}+\frac{\eta L}{2-\eta L} < 1 $$
+$$
+\begin{aligned}
+    \sigma_{m}\stackrel{def}{=}\frac{1}{\mu\eta(m+1)}+\frac{\eta L}{2-\eta L} < 1 
+\end{aligned}
+$$
 
 Recall from [above](#sarah-variance-reduction) that the variance bound for SARAH in the strongly convex case is smaller than that of SVRG. So, while their convergence complexity is the same for strong convexity, SARAH can use a larger learning rate than SVRG. SVRG must use a learning rate of $\eta < \frac{1}{4L}$ whereas SARAH can use $\eta < \frac{1}{L}$.
 
@@ -586,12 +799,25 @@ The ADAM optimizer is a stochastic/batch gradient descent variant that utilizes 
 
 Polyak's momentum is a technique that uses both the current gradient as well as the history of gradients in previous steps to accelerate convergence. The momentum term is incorporated in general with gradient descent style algorithm and uses a hyperparameter $\beta \in [0,1)$ to scale its weight.
 
-$$ \theta_{k+1} = \theta_{k} - \alpha \nabla f(\theta_k) + \beta(\theta_{k} - \theta_{k-1}) $$
+$$
+\begin{aligned}
+    \theta_{k+1} = \theta_{k} - \alpha \nabla f(\theta_k) + \beta(\theta_{k} - \theta_{k-1})
+\end{aligned}
+$$
 
 If we expand this term,
 
-$$ \theta_{k+1} = \theta_{k} - \alpha \nabla f(\theta_k) + \beta( \theta_{k-1} - \alpha \nabla f(\theta_{k-1}) + \beta(\theta_{k-1} - \theta_{k-2}) - \theta_{k-1}) $$
-$$ = \theta_{k} - \alpha \nabla f(\theta_k) - \beta \alpha \nabla f(\theta_{k-1}) + \underset{\text{higher order } \beta \text{ small}}{\underbrace{\beta^2(\theta_{k-1} - \theta_{k-2})}} $$
+$$
+\begin{aligned}
+    \theta_{k+1} = \theta_{k} - \alpha \nabla f(\theta_k) + \beta( \theta_{k-1} - \alpha \nabla f(\theta_{k-1}) + \beta(\theta_{k-1} - \theta_{k-2}) - \theta_{k-1})
+\end{aligned}
+$$
+
+$$
+\begin{aligned}
+    = \theta_{k} - \alpha \nabla f(\theta_k) - \beta \alpha \nabla f(\theta_{k-1}) + \underset{\text{higher order } \beta \text{ small}}{\underbrace{\beta^2(\theta_{k-1} - \theta_{k-2})}}
+\end{aligned}
+$$
 
 If these recent gradients are similar, the algorithm gets an additional "boost", or "momentum". $\theta_{k-1}$ and so on can be expanded similarly, and we get higher order $\beta$ terms as the algorithm iterates. This favors the most recent gradients since $\beta \in [0,1)$ and higher order terms quickly dampen out previous iterates.
 
@@ -601,7 +827,11 @@ If these recent gradients are similar, the algorithm gets an additional "boost",
 
 In ADAM, the momentum term is written as follows.
 
-$$ m_{t} = \beta_{1} \cdot m_{t-1} + (1 - \beta_{1}) \cdot g_{t} $$
+$$
+\begin{aligned}
+    m_{t} = \beta_{1} \cdot m_{t-1} + (1 - \beta_{1}) \cdot g_{t}
+\end{aligned}
+$$
 
 Momentum helps to accelerate convergence, particularly over the contours of objective functions, while also acting as variance reduction in the steps. The technical details of variance reduction in stochastic methods are a little more involved and are covered in [Roux et. al, 2018](https://openreview.net/forum?id=r1qKBtJvG). For and in-depth and beautifully interactive blog about momentum, [I also suggest this post](https://distill.pub/2017/momentum/).
 
@@ -615,11 +845,19 @@ Root-mean-squared propograaion (RMSProp) is a technique that uses the moving ave
 
 The RMSProp update is similar to momentum, using the squared gradient term.
 
-$$ v_{t} = \beta_{2} \cdot v_{t-1} + (1 - \beta_{2}) \cdot g_{t}^2 $$
+$$
+\begin{aligned}
+    v_{t} = \beta_{2} \cdot v_{t-1} + (1 - \beta_{2}) \cdot g_{t}^2 
+\end{aligned}
+$$
 
 And the update rule in a gradient descent algorithm is written as follows.
 
-$$ \theta_{t} = \theta_{t-1} - \alpha \frac{\nabla f(\theta_k)}{\sqrt{v_{t-1}}+\epsilon}  $$
+$$
+\begin{aligned}
+    \theta_{t} = \theta_{t-1} - \alpha \frac{\nabla f(\theta_k)}{\sqrt{v_{t-1}}+\epsilon}
+\end{aligned}
+$$
 
 The $\epsilon$ term only serves to stablize the algorithm as $v_t$ becomes small (the steps will become large if the denominator is small), preventing overshooting close to the optimum.
 
@@ -633,33 +871,65 @@ Our momentum term $m_t$, or the first moment estimator, is meant to estimate the
 
 Let's first consider running ADAM for $T$ timesteps, and let $g_1,...,g_T$ be the gradients at each timestep. We assume the gradients are distributed as $g_t \sim p(g_t)$. At timestep $t$, the first moment estimate term is the following.
 
-$$m_t = \beta_1 \cdot m_{t-1} + (1-\beta_1) \cdot g_t$$
+$$
+\begin{aligned}
+    m_t = \beta_1 \cdot m_{t-1} + (1-\beta_1) \cdot g_t
+\end{aligned}
+$$
 
 We initialize the first moment weights setting $m_{0}=\textbf{0}$ and expand this term by substituting $m_{t-1}$ with each previous timestep, we get
 
-$$ m_t = (1-\beta_1) \sum_{i=1}^{t}{\beta_1^{t-i} \cdot g_i } $$
+$$
+\begin{aligned}
+    m_t = (1-\beta_1) \sum_{i=1}^{t}{\beta_1^{t-i} \cdot g_i }
+\end{aligned}
+$$
 
 Now, we can then take the expectation of $m_t$.
 
-$$ \mathbb{E}[m_{t}] = \mathbb{E} \left[ (1-\beta_1) \sum_{i=1}^{t}{\beta_1^{t-i} \cdot g_i} \right] $$
+$$
+\begin{aligned}
+    \mathbb{E}[m_{t}] = \mathbb{E} \left[ (1-\beta_1) \sum_{i=1}^{t}{\beta_1^{t-i} \cdot g_i} \right]
+\end{aligned}
+$$
 
 We can rewrite $\sum_{i=1}^{t}{\beta_1^{t-i} \cdot g_i}$ by adding and subtracting $g_t$, giving $\sum_{i=1}^{t}{\beta_1^{t-i} \cdot (g_i + g_t - g_t)}$, giving the following.
 
-$$\sum_{i=1}^{t}{\beta_1^{t-i} \cdot g_t} + \underset{\zeta}{\underbrace{\sum_{i=1}^{t}{\beta_{1}^{t-i}\cdot(g_{i}-g_{t})}}}$$
+$$
+\begin{aligned}
+    \sum_{i=1}^{t}{\beta_1^{t-i} \cdot g_t} + \underset{\zeta}{\underbrace{\sum_{i=1}^{t}{\beta_{1}^{t-i}\cdot(g_{i}-g_{t})}}}
+\end{aligned}
+$$
 
 Recent gradients will be close to $g_t$, and gradients further in the past will be quickly dampened by $\beta_1^{t-i}$ as it should be selected to be small, so the $\zeta$ term can be treated as small.  So, our expectation can be written as the following.
 
-$$ \mathbb{E}[m_{t}] = \mathbb{E} \left[ (1-\beta_1) \sum_{i=1}^{t}{\beta_1^{t-i} \cdot g_t} + \zeta \right] $$
+$$
+\begin{aligned}
+    \mathbb{E}[m_{t}] = \mathbb{E} \left[ (1-\beta_1) \sum_{i=1}^{t}{\beta_1^{t-i} \cdot g_t} + \zeta \right] 
+\end{aligned}
+$$
 
-$$ = \mathbb{E}[g_t] \cdot (1-\beta_1) \sum_{i=1}^{t}{\beta_1^{t-i} } + \zeta $$
+$$
+\begin{aligned}
+    = \mathbb{E}[g_t] \cdot (1-\beta_1) \sum_{i=1}^{t}{\beta_1^{t-i} } + \zeta
+\end{aligned}
+$$
 
 Expanding the sum and cancellations of $\beta_1$ term results in the following.
 
-$$ \mathbb{E}[m_{t}] = \mathbb{E}[g_t] \cdot (1-\beta_1^t) + \zeta $$
+$$
+\begin{aligned}
+    \mathbb{E}[m_{t}] = \mathbb{E}[g_t] \cdot (1-\beta_1^t) + \zeta
+\end{aligned}
+$$
 
 The calculation steps for the second moment estimates follow identical logic, and we get the following expectation for $v_{t}$.
 
-$$\mathbb{E}[v_{t}]=\mathbb{E}[g_{t}^{2}]\cdot(1-\beta_{2}^{t})+\zeta$$
+$$
+\begin{aligned}
+    \mathbb{E}[v_{t}]=\mathbb{E}[g_{t}^{2}]\cdot(1-\beta_{2}^{t})+\zeta
+\end{aligned}
+$$
 
 Clearly, $m_t$ is a biased estimator for $g_t$, and $v_t$ is biased for $g_t^2$.
 
@@ -685,7 +955,11 @@ There is existing infrastructure for ADAM among some common machine learning too
 The purpose of the numerical experiment will be to evaluate general performance of ADAM and SARAH on real data and to illustrate a bias-variance tradeoff between SVRG and SARAH.
 We use the "Wine Quality" dataset from the UC Irvine Machine Learning Repository **CITE winequality**. The data are measurements of wine characteristics (features) used to predict wine quality scores. There are $n=6497$ instances and $m=11$ features. The experiements will use a simple least squares linear regression objective, assuming a system with data $A$ and response $b$ is of the form $Ax=b$.
 
-$$\underset{x}{\text{min}}||Ax-b||^{2}$$
+$$
+\begin{aligned}
+    \underset{x}{\text{min}}||Ax-b||^{2}
+\end{aligned}
+$$
 
 The least squares objective was chosen because it is strongly convex.  $x^*$ was computed separately using `scipy.optimize.lsq_linear` with tolerance set to $1e-10$.
 
