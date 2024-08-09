@@ -1,0 +1,744 @@
+---
+title: Machine Learning Optimization - Stochastic Descent, Variance Reduction Techniques, and the Bias-Variance Tradeoff
+date: 'April 2024'
+tags: ['SDS', 'blog', 'highlights']
+draft: false
+summary: A dive into techniques and statistical background in machine learning optimization, with focus upon stochastic gradient descent, variance reduction techniques, and the bias-variance Tradeoff
+---
+
+
+## Introduction
+
+The intent of this post is to explore some examples of variance reduction techniques in gradient descent optimization methods for machine learning, with some focus on their underlying statistical concepts. We will use the ADAM optimizer, a popular algorithm in neural network optimization and deep learning, and the less prolific SARAH optimizer (a variant of SVRG) as examples of algorithms in practice, with additional background on the methodologies from which these stochastic optimizers are derived including SGD, SAG, SAGA, and SVRG. In addition to exploring the techniques themselves, we will lend some focused attention to some bias-variance tradeoffs unique to variance reduction techniques, which are unrelated to the typical overfitting/overparameterization bias-variance tradeoff traditionally examined in machine learning. There are many resources available online for all of these topics, and I will provide [some links to my favorites](#suggested-resources), but my aim is to cover the basic underlying concepts needed to build some more common and contemporary algorithms.
+
+This post will cover variance reduction techniques with some technical statistical details, and assumes the reader has a basic understanding of machine learning principles and gradient descent ([here's a 3Blue1Brown video if you need a refresher](https://www.youtube.com/watch?v=IHZwWFHWa-w), but I also dedicated [a section of this post to my own refresher](#crash-course%3A-gradient-descent)). But, my intent is to make these topics accessible for an audience looking for some enhanced understanding of techniques in machine learning optimization. I will include links and additional details wherever I feel it's warranted, but I am open to [any feedback you may have](mailto:avsalce@gmail.com).
+
+Information for this post is largely drawn from my final project for an optimization course I took in the Spring of 2024, for which the paper and presentation are avialable below. 
+
++ [ADAM and SARAH Optimization Paper](files/ml_optimization/SIE596_FinalProject_VR_SARAH_ADAM_Salce.pdf)
+
++ [ADAM and SARAH Optimization Slides](files/ml_optimization/SIE_596_Final_Presentation_SARAH_ADAM_Salce.pdf)
+
+Please refer to these documents for additional formal details, the post may reference portions of them for clarity.
+
+## Background
+
+### Machine Learning Optimization and Stochastic Optimizers
+
+Optimization as a field has become critical to recent progress in machine learning as the field expands its applications into ever greater swathes of data. We are using machine learning to approach increasingly large datasets, and to do so effectively we need model optimization techniques that are both fast and guarantee convergence.  Stochastic optimizers are a class of algorithms that have become prevalent in recent years due to their theoretical convergence properties with the desirable efficiency of stochastic processes. Being stochastic methods, they require special techniques to address and control variance in their computations to accomplish any advantageous theoretical convergence over other common methods. 
+
+When optimizing machine learning model parameters, first-order gradient descent algorithms utilizing stochastic gradients (individual gradient selected uniformly at random), or minibatch gradients (subsets of a full gradient whose elements selected uniformly at random), have become core staples in marchine learning frameworks due to their advantageous computational efficiency for applications to datasets of both large sample size and dimensionality. But, the randomness (variance) in the steps that is introduced to these gradient descent methods with stochasticity tends to slow down or inhibit convergence of the algorithms, so it is in our interest to implement techniques to curb this variance.
+
+NEED A BETTER IMAGE HERE
+
+<div className="-mx-2 flex flex-wrap overflow-hidden xl:-mx-2">
+![SARAH and GD](/static/files/ml_optimization/images/sarah_gd.png#center)
+</div>
+
+UPDATE EXAMPLE DESCRIPTION
+This is just a visual example we will later revisit; the stochastic SARAH method (green) steps randomly toward the solution in the middle, but overall does arrive close to it. Any steps not directly toward the solution can be considered variance in the algorithm's steps. For comparison, regular gradient descent (blue) steps only in the direction of the optimal solution. For algorithms utilizing stochastic approaches, controlling variance can be critical to guaranteeing convergence, which has motivated variance reduction techniques in the development of new stochastic optimization algorithms.
+
+
+## Crash Course: Gradient Descent
+
+*This section is some entry-level background to machine learning concepts, so please skip if you already have a grasp.*
+
+The goal in machine learning optimization is to "train" model parameters for a machine learning model we choose to use, which will ultimately depend on the application. We will use the simple but very commonly used linear model as an example.
+
+#### Least Squares Regression
+
+We are interested in training a model using $n$ data samples with $p$ features and known outputs for each data sample. The model we will use as an example is a simple linear system.
+
+$$A\boldsymbol{\theta}=\boldsymbol{b}$$
+
+Matrix $A \in \mathbb{R}^{n \times p}$ represents our data, and $\boldsymbol{b} \in \mathbb{R}^{n \times 1}$ is the response vector with entries $b_i$ corresponding to the known output of each row of data $a_i \in A$, $i \in 1,...,n$.  Our model uses a vector of parameters $\theta_j \in \boldsymbol{\theta}$, $j \in 1,...,p$, where $\boldsymbol{\theta} \in \mathbb{R}^{p \times 1}$. This is a linear model, where the product $A\boldsymbol{\theta}$ should ideally produce exactly $b$. 
+
+In a typical application, however, this system is *overdetermined* ($n>p$, i.e. more data than there are features that describe the data; column rank$(A)=p$), and is *inconsistent* ($A\boldsymbol{\theta}=\boldsymbol{b}$ has no solution). 
+
+Since we cannot find an exact solution to the model, we want to optimize each of our parameters $\theta_j$ such that the product $A\boldsymbol{\theta}$ produces the best *approximate* solution to the system. In other words, we want to *train* the model to be able to predict the known outputs as well as it can by adjusting each of the $\theta_j \in \boldsymbol{\theta}$.
+
+To do so, we aim to minimize a quantity we call the "loss" of the model; a measure of error between predictions $A\boldsymbol{\theta}$ and the actual label values $b$ as a function of the however the $\theta_j \in \boldsymbol{\theta}$ are selected (or in our case, how we optimize them).  
+
+"Loss" will be quantified as a function of the $\theta_j \in \boldsymbol{\theta}$ expressed as $f(\boldsymbol{\theta})$, also sometimes called the "objective function". So, the "loss" will depend on the parameters $\boldsymbol{\theta}$ that we choose.
+
+A common loss function $f$ that we see in machine learning is a simple least-squares regression fit, where $f(\boldsymbol{\theta})$ is the following.
+
+$$f(\boldsymbol{\theta}) = ||A\boldsymbol{\theta}-\boldsymbol{b}||^{2}$$
+
+Here, $A\boldsymbol{\theta}$ generates a vector of predictions, and the loss function $f$ calculates the squared Euclidian distance between the prediction vector $A\boldsymbol{\theta}$ and the true labels vector $\boldsymbol{b}$. 
+
+Our optimized model with our "trained parameters" satisfies the following.
+
+$$\boldsymbol{\theta}^{*}\in\underset{\boldsymbol{\theta}}{\text{min}}||A\boldsymbol{\theta}-\boldsymbol{b}||^{2}$$
+
+#### Gradient Descent in Machine Learning
+
+The gradient descent algorithm is ideal for optimization of this kind of problem. It is an iterative algorithm that is designed to update parameters by changing each parameter by some amount, in such a way that the "loss" decreases.
+
+We must note that the least squares objective function $f$ is convex, for which follows that $f$ must have a global minimum (it must reach a "smallest" value). Not all problems in machine learning utilize convex loss functions, but many common applications do in practice. 
+
+**This post will assume, unless otherwise stated, that the objective function $f$ is convex (i.e. we will be covering convex optimization).**
+
+Common examples of convex objective functions include logistic regression, data fitting, SVMs, Lasso and Group Lasso. Convexity is detailed more formally in the [appendix](#convexity).
+
+In basic terms, the gradient descent algorithm uses the gradient of the loss function $f(\boldsymbol{\theta})$ (denoted $\nabla f(\boldsymbol{\theta})$), or the vector of partial derivatives for each vector component $\frac{df_i}{d\theta}$ evaluated at the parameter values $\theta_j$, to determine the "steepest" direction that the loss is *increasing*. It's worth taking a look in the [appendix at the details of the gradient operation](#gradient-calculation) if you are not familiar.
+
+The negative gradient will indicate the steepest direction that our loss function $f(\boldsymbol{\theta})$ is *decreasing*, and if we move the values of the $\theta_j$s in that direction, we will decrease the loss $f(\boldsymbol{\theta})$. Ultimately, we intend to optimize $f(\boldsymbol{\theta})$ by minimizing it, so we hope to adjust the $\theta_j$s until our loss is minimized ("minimized" is usually defined by criteria we select).
+
+So, if we start with some initial parameters $\boldsymbol{\theta_0}$, we can subtract $\nabla f(\boldsymbol{\theta_0})$ to "step" the parameter tuning in the direction that will minimize the loss function. However, we need to control the size of the steps that we take, so we include a parameter $\alpha$ that we can tune on our own (called a "hyperparameter"), to scale $\nabla f$ and control the size of the step we take in that direction. The parameter $\alpha$ is commonly referred to as the "learning rate".
+
+Since we likely will not arrive at the solution after one step, we can use the resulting weights $\boldsymbol{\theta_1}$ and evaluate $\nabla f(\boldsymbol{\theta_1})$ to continue and take another step. We continue onward by recursively plugging parameter values back into the algorithm and in general after $t$ steps, we have the gradient descent algorithm.
+
+$$\theta_{t+1}=\theta_{t}-\alpha \nabla f(\theta_{t})$$
+
+The algorithm iterates over discrete timesteps $t$, stepping toward the minimum of $f(\theta_t)$ proportional to the learning rate $\alpha$.
+
+Now, picking up from the previous section, we will use a simple least squares loss regression of some data we generate as an example. We will generate 100 random points $x_i\in X$, $i \in 1,...,100$ where $X \sim \text{Unif}(0,2)$, and assign labels to these points where $y_i = x_i + 4 + z_i$ where $z_i \in Z \sim N(0,1)$ is a standard gaussian noise term to make our $y_i$ values noisy. We only want to fit a first-order polynomial line to the data in this example, so the only two "features" that we will use for our parameters to fit are slope and intercept, $\boldsymbol\theta = \left[\begin{array}{c}
+\theta_{slope}\\
+\theta_{intercept}
+\end{array}\right]$. 
+
+We then initialize a slope and intercept for $\boldsymbol{\theta_0} = \left[\begin{array}{c}
+\theta_{slope,0}\\
+\theta_{intercept,0}
+\end{array}\right]$ (in this example just $\left[\begin{array}{c}
+0\\
+0
+\end{array}\right]$), select a learning rate $\alpha=0.1$ (we will discuss how to more carefully select this hyperparameter later), and perform the gradient descent algorithm for $t=100$ steps (iterations). Below we animate the process, where the top plot is the line being fitted, the middle plot is the value of our loss gradually minimizing, and the last plot is the values for the slope and intercept.
+
+ADD LOSS FUNCTION PLOT TO THIS ANIMATION?
+
+<div className="-mx-2 flex flex-wrap overflow-hidden xl:-mx-2">
+![GD Least Squares fit](/static/files/ml_optimization/images/gdlsfit.gif#center)
+</div>
+
+Since we know how we generated the data, we know that the true optimal is $\boldsymbol\theta = \left[\begin{array}{c}
+    2\\
+    4
+\end{array}\right]$, which we can see visually in the first plot.
+
+There are a few observations we can note here.
+
++ The parameters are converging to the optimal solution, taking large steps early on but slowing down as it approaches the optimum.
++ Loss also falls steeply intially, but after around 10 steps it levels off around 1 (the variance of the noise of the data itself).
++ 100 steps is not enough to get all the way to true optimal solution.
+
+In short, we are seeing the parameters converge toward the optimal solution as the algorithm iterates, but it doesn't get us quite to the exact solution that is underlying the noise. When training a machine learning model, this isn't necessarily a bad thing. In fact, models that are not "overfit" to training data, i.e. fit "too closely" to the training data, often generalize better to make predictions for unseen data than models that match too closely with the training data.  We may only care that the model weights we use are within some guaranteed tolerance of the true solution (an example is included in the third plot), which can be proven to be the case for gradient descent with convex $f$ (see [here]() FOR MORE DETAILS).
+
+#### Limitations of Regular Gradient Descent 
+
+In a theoretical sense, regular gradient descent is robust, guaranteed to converge for convex objective functions, and will guarantee we are within a tolerance of the true solution (or we will know how close we are after some number of iterations). However, in practice it has limitations.
+
+Regular gradient descent works well for a very simple example like this (small sample size, only two features), but in practical machine learning applications with large datasets, it has glaring computational deficiencies. 
+
+We turn our attention to the gradient calculation itself, and consider a gradient calculation at timestep $t$, $\nabla f(\theta_t)$ for $\theta_t \in \mathbb{R}^{p \times 1}$ for a dataset with $p$ features and $n$ samples. At each timestep, we are computing the *full* gradient. It is helpful to write out what the gradient calculation really looks like for our least square loss example.
+
+$$\nabla f (\boldsymbol{\theta_t}) = \frac{1}{n}\sum_{i=1}^{n}{\nabla f_i(\boldsymbol{\theta_t})}$$
+
+$$\nabla f_i (\boldsymbol{\theta_t}) = \frac{d}{d\theta} (||a_i\boldsymbol{\theta_t}-b_i||^{2})$$
+
+In terms of complexity, each step has $p \cdot n$ calculations per step. It can be shown that since $f$ is convex and Lipschitz continuous, for $\alpha$ selected carefully using what is called the Lipschitz constant $L$ ([you can learn more about Lipschitz continuity here](https://www.youtube.com/watch?v=UjvFFXakMks&t=418s)), that after $T$ iterations the following will hold.
+
+$$f(\theta_T)-f(\theta^*) \leq \frac{L}{2T} ||\theta_0 - \theta^*|| \text{ for } T \geq 1$$
+
+Where $\theta^*$ is the true optimal solution ($\boldsymbol\theta^* = \left[\begin{array}{c}
+2\\
+4
+\end{array}\right]$ from our earlier example), and $\theta_0$ is our initialization ($\boldsymbol{\theta_0} = \left[\begin{array}{c}
+    \theta_{slope,0}\\
+    \theta_{intercept,0}
+\end{array}\right]$ $=$ $\left[\begin{array}{c}
+    0\\
+    0
+\end{array}\right]$ also from our earlier example). 
+
+We say that this converges at a rate $\mathcal{O}(\frac{1}{T})$. In other words, we can choose the number of gradient descent iterations $T$ and know for certain upper bound of the loss for the current parameters as compared to the optimal parameters is proportional to $\frac{1}{T}$ ( [more on "big O notation" here](http://web.mit.edu/16.070/www/lecture/big_o.pdf) ).
+
+This means that we can guarantee we are within some tolerance of the true optimal solution after $T$ iterations. But, if we are calculating $\nabla f (\boldsymbol{\theta_t})$ at each of those $T$ iterations, and our dataset is large, it can become computationally prohibitive to get a solution within a desirable tolerance.
+
+In machine learning optimization, we are always seeking faster ways to train our models. When approaching an optimization problem we might ask ourselves questions like,
+
++ How can optimize my parameters ("train the model") in the fewest steps?
++ How can I improve the computational cost of my steps?
++ When can we terminate the algorithm, and what are my criteria for stopping?
+
+These are the kinds of questions that might motivate a search for more efficient algorithms. A common approach to address such motives is to use approximations, for which stochasticity has some desirable theoretical properties to help us.
+
+## Stochastic Gradient Descent
+
+Stochastic methods are common in many areas of computational mathematics and are desirable for improving computational performance by leveraging random operations. A stochastic approach to gradient descent is a natural extension; we want to speed up an inherently slow but robust method for training our machine learning models.
+
+The core concept of stochastic gradient descent is straightforward -- rather than performing a full gradient calculation at each timestep of gradient descent, we can sample individual gradients $\nabla f_i$'s (where $i$ is selected uniformly at random from $1,...n$) in lieu of computing the full gradient $\nabla f$. We use a randomly sampled $\nabla f_i$ at each step as a general approximation for the full gradient $\nabla f$ in the descent algorithm to step toward the solution at significantly reduced computational cost, with the concession that the step is an approximation. 
+
+IMAGE OF MATRIX OF FULL GRADIENT, VS. A SINGLE HIGHLIGHTED ROW 
+
+So, we would like to show that this randomly sampled gradient is a valid estimator of the true gradient.
+
+### SGD Algorithm
+
+For stochastic descent, we want to consider the following problem, minimizing the average of functions, where $f$ is our objective function, a function of our model parameters $\theta$.
+
+$$ \underset{\boldsymbol{\theta}}{\text{min}f(\boldsymbol{\theta})}\overset{\Delta}{=}\frac{1}{n}\sum_{i=1}^{n}{f_{i}(\boldsymbol{\theta})} $$
+
+Taking the gradient of this objective function $f$ gives
+
+$$ \nabla f(\boldsymbol{\theta}) = \frac{1}{n}\sum_{i=1}^{n}{\nabla f_{i}(\boldsymbol{\theta})} $$
+
+Stochastic gradient descent (SGD) is defined as the following.
+
+$$\boldsymbol{\theta}_{k+1}=\boldsymbol{\theta}_{k}-\alpha_{k} \nabla f_{i_{k}}(\boldsymbol{\theta}_{k})$$
+
+where $i_{k} \in \{1,...,n\}$ is an index chosen uniformly at random for an iteration $k$. 
+
+**Note:** *SGD cannot converge with a fixed step size; instead it must use a diminishing step size that satisfies $\underset{k \rightarrow \infty}{\text{lim }\alpha_{k} = 0}$ and $\overset{\infty}{\underset{k=1}{\sum}}{\alpha_{k}} = \infty$. Hence learning rate is denoted with $\alpha_{k}$.*
+
+We want to determine whether $\nabla f_{i_{k}}(\boldsymbol{\theta}_{k})$ is a valid estimator for the true gradient $\nabla f(\boldsymbol{\theta}_{k})$, so we are interested in its expectation. Since $i_k$ is selected uniformly at random, the following expectation holds.
+
+$$ \mathbb{E}[\nabla f_{i_{k}}(\boldsymbol{\theta}_{k})] = \sum_{i=1}^{n}{P(i=i_{k}) \nabla f_{i_{k}}(\boldsymbol{\theta}_{k})} = \frac{1}{n} \sum_{i=1}^{n}{ \nabla f_{i_{k}}(\boldsymbol{\theta}_{k})} = \nabla f(\boldsymbol{\theta}_{k}) $$
+
+So, an individual gradient is an unbiased estimator for the full gradient, a fundamental principle to stochastic gradient descent.
+
+This presents a great computational advantage -- since we are selecting an individual gradient at random $\nabla f_{i_{k}}$, $i_{k} \in \{1,...,n\}$ for each iteration of SGD, it doesn't matter what the sample size of our data is. The sample size of the data $n$ could be very large and an SGD computation will "cost" the same per iteration.
+
+ADD SOME VISUAL EXAMPLE OF SGD HERE
+
+TALK ABOUT VARIANCE IN THE STEPS
+Since we are now taking steps in our descent algorithm using approximations of the gradient, we are going to be taking steps only approximately in the direction of the optimum.
+
+### SGD Convergence and Variance
+
+The inexactness of the steps that we have now introduced to gradient descent is variance. Variance in our algorithm's steps can in fact slow the algorithm down in its own right (we are only approximately stepping in the right direction after each step), so we must take additional considerations to how we approach the development of SGD algorithms. First, we must be able to quantify the variance.
+
+An analysis of convergence of SGD reveals how we quantify the variance in the algorithm's steps. The SGD algorithm can be rewritten as the following.
+
+$$ \boldsymbol{\theta}_{k+1}=\boldsymbol{\theta}_{k}-\alpha_{k} [\nabla f(\boldsymbol{\theta}_{k})-\underset{w_{k}}{\underbrace{(\nabla f(\boldsymbol{\theta}_{k})-\nabla f_{i_{k}}(\boldsymbol{\theta}_{k}))}}] $$
+
+ We assume $f$ is convex and that $\nabla f$ is Lipschitz continuous.  First, we define $\boldsymbol{w_{k}} \overset{\Delta}{=} \nabla f(\boldsymbol{\theta_{k}}) - \nabla f_{i_{k}}(\boldsymbol{\theta_{k}})$. $\boldsymbol{w_{k}}$ quantifies the error between the full gradient and a stochastic gradient at iteration $k$. 
+ 
+ Next, we take the conditional expectiation of $\boldsymbol{w_{k}}$ given parameters $\boldsymbol{\theta_{k}}$,
+
+ $$ \mathbb{E} [\boldsymbol{w_{k}} | \boldsymbol{\theta_{k}}] = \mathbb{E} [ \nabla f(\boldsymbol{\theta_{k}}) - \nabla f_{i_{k}}(\boldsymbol{\theta_{k}}) | \boldsymbol{\theta_{k}}] =  \nabla f(\boldsymbol{\theta_{k}}) - \underset{\nabla f (\boldsymbol \theta_{k})}{\underbrace{\mathbb{E} [\nabla f_{i_{k}}(\boldsymbol{\theta_{k}}) | \boldsymbol{\theta_{k}}]}} = 0  $$
+
+ We establish $\boldsymbol{w_{k}}$ is conditionally unbiased as an assumption. Now we take the conditional variance and use the conditional unbiasedness assumption for the following.
+
+ $$ \text{Var}(\boldsymbol{w_{k}} | \boldsymbol{\theta_{k}}) = \mathbb{E} [\boldsymbol{w_{k}} \boldsymbol{w_{k}}^T | \boldsymbol{\theta_{k}}] - \underset{=0}{\underbrace{\mathbb{E} [\boldsymbol{w_{k}} | \boldsymbol{\theta_{k}}]^2 }} $$
+
+ We can now use the [Cauchy-Schwarz Inequality](https://en.wikipedia.org/wiki/Cauchy%E2%80%93Schwarz_inequality) to show
+
+ $$ || \text{Var}(\boldsymbol{w_{k}} | \boldsymbol{\theta_{k}}) || \leq \mathbb{E} [||\boldsymbol{w_{k}}||^2 | \boldsymbol{\theta_{k}} ] \leq \sigma^2 $$
+
+So our conditional variance must be bounded by some constant variance $\sigma^2$. 
+
+Next, we want to observe a sequence of $\boldsymbol{\theta_{k}}$ generated by SGD after $T$ iterations, $k \in \{1,...,T\}$. Let $\bar{\boldsymbol{\theta}}_T = \frac{1}{T} \sum_{k=0}^{T-1}{\boldsymbol{\theta_{k+1}}}$ and $\alpha \leq \frac{1}{2L}$.  
+
+Under these assumptions, we show the following convergence for SGD.
+
+$$ \mathbb{E}[f(\bar{\boldsymbol{\theta}}_T)-f(\boldsymbol{\theta}^*)] \leq \frac{1}{2 \alpha_k T}|| \boldsymbol{\theta_0} - \boldsymbol{\theta^*} ||^2 + \alpha_k \sigma^2 $$
+
+If we select $\alpha_k = \frac{1}{\sqrt{T}}$, we achieve a convergence rate of $\mathcal{O}(\frac{1}{\sqrt{T}})$, which is an improvement over regular gradient descent. Note here, $\alpha_k$ decays as we step, so the algorithm "slows down" as we proceed. The variance in the steps requires that our learning rate decays, which is generally undesirable.
+
+We are able to quantify a bound for the variance of SGD, and we can now start to explore what different approaches we may take to reduce it.
+
+## Variance Reduction Techniques
+
+### The Bias-Variance Tradeoff
+
+You may already be familiar with a bias-variance tradeoff scenario in machine learning -- our model is not producing desirable training error, so we choose to increase the complexity to better fit the training data. However, in doing so we may find that we "overfit" the model to the training data and create a prediction model that is biased to the details and minutae of the training data. When we apply the model to test data that it has not previously seen, it performs more poorly than our simpler model. 
+
+This is commonly referred to as "overfitting" and is an example of a biased model. As we increase the complexity of our model, we are trading the magnitude of prediction error to the test data (variance) for bias to the training data itself.
+
+The bias-variance tradeoff we see in variance reduction techniques for SGD algorithms is fundamentally different than our familiar example. 
+
+Model complexity bias-variance tradeoffs can affect the error in *predictions* by the model itself -- but in the context of *stochastic optimizaiton*, bias and variance can impact error in *parameter updates*. 
+
+The issue with this variance in general ends up being the rate at which we converge, or whether we converge at all. Variance that overwhelms the steps, it can adversely impact the rate at which we converge to an acceptable solution, and if our algorithm takes too long to execute, we have defeated the purpose of using stochastic methods. In all, our goal becomes finding a balance of the computational advantages of stochastic processes while keeping variance (and as we will see, bias) under control in order to reap the advantages of faster algorithms.
+
+OVERFITTING AND ERROR IMAGE
+
+### MSE, Variance and Bias
+
+Before we get into some techniques that can address variance in stochastic descent, we need to observe one of the core principles of statistical anlysis.  
+
+Part of our due diligence in statistics is to analyze the quality of an esimator. To quantify the accuracy of an estimator $\hat{\boldsymbol{\theta}}$, we measure the error of the estimator compared to the true value of the parameter $\boldsymbol{\theta}$ it is estimating by using Mean Squared Error (MSE). 
+
+MSE is a quantity defined as the expected value of the square difference between the parameter estimate and the true parameter value. Skipping some steps in between, it can be decomposed into both a variance component and a bias component ([a link to a helpful video about MSE](https://www.youtube.com/watch?v=lET4uQLpmM0)).
+
+$$ \text{MSE}(\hat{\boldsymbol{\theta}}) = \mathbb{E}_{\theta}[(\hat{\boldsymbol{\theta}}-\boldsymbol{\theta})^2] = \text{Bias}(\hat{\boldsymbol{\theta}})^2 + \text{Var}(\hat{\boldsymbol{\theta}}) $$
+
+In statistics, we often measure the quality of an estimator by whether it is both *unbiased* and *consistent*. We won't dive into consistency of estimators further here ([see appendix for some detail](#consistency)), but we do want to take note that in general, unbiased estimators are preferred estimators to those that are biased in some way. In terms of MSE, if our estimator is unbiased, then its MSE is equal to its variance. 
+
+In the previous section some examples of an unbiased estimator. 
+
+For example, we assume our conditional estimator of the approximation error for a gradient, $\boldsymbol{w_{k}} | \boldsymbol{\theta_{k}}$ is unbiased, i.e. $\mathbb{E} [\boldsymbol{w_{k}} | \boldsymbol{\theta_{k}}] = 0$, where $\boldsymbol{w_{k}} \overset{\Delta}{=} \nabla f(\boldsymbol{\theta_{k}}) - \nabla f_{i_{k}}(\boldsymbol{\theta_{k}})$. So, the MSE for the estimator $\boldsymbol{w_{k}} | \boldsymbol{\theta_{k}}$ is only its variance.
+
+We showed $\text{Var}(\boldsymbol{w_{k}} | \boldsymbol{\theta_{k}}) = \mathbb{E} [\boldsymbol{w_{k}} \boldsymbol{w_{k}}^T | \boldsymbol{\theta_{k}}] \leq \mathbb{E} [||\boldsymbol{w_{k}}||^2 | \boldsymbol{\theta_{k}}]$, so the MSE of $\boldsymbol{w_{k}} | \boldsymbol{\theta_{k}}$, the estimate of stochastic gradient estimation error for a given $\boldsymbol{\theta_{k}}$, is the following.
+
+$$ \text{MSE}(\boldsymbol{w_{k}} | \boldsymbol{\theta_{k}}) = \mathbb{E} [\boldsymbol{w_{k}} \boldsymbol{w_{k}}^T | \boldsymbol{\theta_{k}}] $$
+which is bounded by a constant variance term.
+$$ || \text{MSE}(\boldsymbol{w_{k}} | \boldsymbol{\theta_{k}}) || \leq \sigma^2$$
+
+It is important to be cognizant of MSE as the measure for error of an estimator rather than just the variance. We don't just care about variance -- bias is a nontrivial and undesirable quantity if we are not careful. 
+
+As we explore variance reduction techniques, we will see that if we attempt to curb error due to variance but do not reduce overall MSE of the estimator in doing so, that MSE information is only "transferred" to the bias component. Compounding effects of bias in recursive descent algorithms can become especially problematic, so as we continue, we will give special attention to ensuring we also take it into account.
+
+
+### Minibatch SGD
+
+Since variance in the algorithm's steps is a consequence of using estimates of the full gradient, it is pragmatic to utilize improved approximations. One natural statistical approach to improving an approximation is simple, we should use more data. We can do so by taking random batch samples of the full data -- minibatches.
+
+Minibatches are an important variance-reduction technique that are commonly seen in the class of gradient descent algorithms. Rather than sampling random *individual* gradients from the full gradient at each step, we can improve our gradient approximation by sampling a random subset $I_k \subset \{ 1,...,n \}$ where $|I_k|=b < < n$ and modify the SGD algorithm to average the "minibatches".
+
+$$\boldsymbol{\theta}_{k+1}=\boldsymbol{\theta}_{k}- \frac{\alpha_{k}}{b} \underset{i \in I_k}{\sum} \nabla f_{i_{k}}(\boldsymbol{\theta}_{k})$$
+
+IMAGE OF RANDOM SAMPLE MATRIX HIGHLIGHT THING
+
+We first take the conditional expectation modified from SGD. Note, as with SGD the gradient estimate is unbiased $E[\frac{1}{b} \underset{i \in I_k}{\sum} \nabla f_{i_{k}}(\boldsymbol{\theta}_{k})] = \nabla f(\boldsymbol{\theta}_{k})$.
+
+$$ || \text{MSE}(\boldsymbol{w_{k}} | \boldsymbol{\theta_{k}}) || = \mathbb{E}[||\boldsymbol{w_k}||^2 | \boldsymbol{\theta_k}] = \mathbb{E}[|| \frac{1}{b} \underset{i \in I_k}{\sum} (\nabla f_{i_{k}}(\boldsymbol{\theta}_{k}) - \nabla f(\boldsymbol{\theta}_{k})) ||^2 | \boldsymbol{\theta_k}]$$
+
+
+$$ \leq \frac{1}{b^2} \cdot b \underset{i \in I_k}{\sum} \mathbb{E}[ || (\nabla f_{i_{k}}(\boldsymbol{\theta}_{k}) - \nabla f(\boldsymbol{\theta}_{k})) ||^2 | \boldsymbol{\theta_k} ] \leq \frac{\sigma^2}{b} $$
+
+*Note that the above calculation uses the identity $||\overset{n}{\underset{i=1}{\sum}} a_i||^2 \leq  \overset{n}{\underset{i=1}{\sum}} ||a_i||^2$ to derive inequality.*
+
+We can reduce the variance bound by a factor of batch size be $b$. Since the estimator is unbiased, we do not need to be concerned with mere displacement of MSE a bias term. Intuitively we can make sense of this since we are using more information for each gradient calculation, and thus we get a better approximation $\nabla f_{i_{k}}(\boldsymbol{\theta}_{k})$ of the gradient $\nabla f(\boldsymbol{\theta}_{k})$ at each step $k$. *Note here also that this result does not require a diminishing learning rate, so it can be applied to gradient descent algorithms with constant or adaptive learning rates.*
+
+The tradeoff here, though, is a more expensive gradient computation by a factor of $b$ at each timestep. No free lunch! A convergence analysis will show that minibatch SGD converges at a rate  $\mathcal{O}(\frac{1}{\sqrt{T}})$, which is the same as SGD but at greater expense computationally due to the batch size. It's largely considered a compromise between SGD and regular gradient descent.
+
+COMPARISON BETWEEN BATCH SIZES ANIMATION
+
+### Stochastic Average Gradient (SAG) and SAGA
+
+SAG and SAGA utilize important variance reduction techniques and are often treated as benchmarks for comparison with stochastic and batch gradient descent algorithms. Minibatches serve well in reducing variance, however as we increase the batch size, we are also increasing the per-iteration computational cost; as $b$ approaches $n$, we end up back where we started with regular gradient descent.  Our goal is to achieve a convergence rate of $\mathcal{O}(\frac{1}{T})$ with a cost of one gradient per iteration, motivating SAG.
+
+#### Stochastic Average Gradient (SAG)
+
+The framework for SAG uses gradient descent in the following form, taking the average gradient at each iteration.
+
+$$\boldsymbol{\theta}_{k+1}=\boldsymbol{\theta}_{k}- \frac{\alpha}{n} \sum_{i=1}^{n}{g_k^{(i)}} $$
+
+where $g_k^{(i)} = \nabla f_i(\boldsymbol{\theta}_{k})$.
+
+For SAG, we will update only one gradient at step $k$, $g_k^{(i_k)} = \nabla f_{i_k}(\boldsymbol{\theta}_{k})$ for uniformly random chosen $i_k$, and keep all other $g_k^{(i)}$ at their previous value.
+
+To accomplish this, the procedure maintains a table containing $g_k^{(i)}(\boldsymbol{\theta}) = \nabla f_{i}(\boldsymbol{\theta})$, $i=1,...,n$. This table does require additional storage computationally proportional to the size of the data.
+
+We first initialize $\boldsymbol{\theta}_{0}$ and set $g=0$ and $g^{(i)}=0$ for all $i=1,...,n$.
+
+At each step $k=1,2,3...$ we select $i_k \in \{1,...,n \}$ uniformly at random and update our individual gradient, keeping all other values of $g_k^{(i)}$ the same.
+
+$$g_{k}^{(i)} = \begin{cases} \nabla f_{i}(\boldsymbol{\theta}_{k-1}) & i=k\\ g_{k-1}^{(i)} & i\neq i_{k} \end{cases}$$
+
+We then perform the per iteration update.
+
+$$\boldsymbol{\theta}_{k}=\boldsymbol{\theta}_{k-1}- \alpha \left ( \frac{1}{n} \sum_{i=1}^{n}{g_k^{(i)}} \right ) $$
+
+We now have a new estimator for the gradient which we will call $\hat{g}$, which can be written as the following.
+
+$$ \hat{g} = \frac{1}{n} \left( g_k^{(i_k)} - g_{k-1}^{(i_k)}  \right) + \frac{1}{n} \sum_{i=1}^{n}{g_{k-1}^{(i)}} $$
+
+If we set $X = g_{k}^{(i_k)}$ and $Y = g_{k-1}^{(i_k)}$, noting that $\mathbb{E}[Y] = \frac{1}{n} \overset{n}{\underset{i=1}{\sum}}{g_{k-1}^{(i)}}$, $\hat{g}$ can be rewritten as the following.
+
+$$ \hat{g} = \frac{1}{n} \left( X - Y \right) + \mathbb{E}[Y] $$
+
+As with our previous analysis of estimators, we take the expectation of $\hat{g}$,
+
+$$ \mathbb{E}[\hat{g}] = \frac{1}{n} \left( \mathbb{E}[X] - \mathbb{E}[Y] \right) + \mathbb{E}[Y] $$
+$$ = \frac{1}{n} \mathbb{E}[X] - (1-\frac{1}{n})\mathbb{E}[Y] \neq 0 $$
+
+Our expectation for our estimator is nonzero, so our gradient estimator $\hat{g}$ is biased!
+
+Omitting the details, SAG can be shown to converge under our usual convexity and Lipschitz continuity for the gradient per the following. For $\alpha = \frac{1}{16L}$ and and the intialization,
+
+$$ g_{0}^{(i)} = \nabla f_i(\boldsymbol{\theta}_{0}) - \nabla f(\boldsymbol{\theta}_{0}) \text{,  } i=1,...,n$$
+
+we achieve the following convergence.
+
+$$  \mathbb{E}[f(\bar{\boldsymbol{\theta}}_T)-f(\boldsymbol{\theta}^*)] \leq \frac{48n}{T} \left( f(\boldsymbol{\theta_0}) - f(\boldsymbol{\theta^*}) \right) + \frac{128L}{T}|| \boldsymbol{\theta_0} - \boldsymbol{\theta^*} ||^2 $$
+
+Comparing directly to SGD:
+
++ This is the desired $\mathcal{O}(\frac{1}{T})$ (more accurately $\mathcal{O}(\frac{n+L}{T})$), which is overall an improvement as compared to SGD $\mathcal{O}(\frac{1}{\sqrt{T}})$
++ Converges with constant learning rate
++ SAG does *not* require the assumption of conditional boundedness of the variance ($\mathbb{E}[ || w_k ||^2 | \boldsymbol{\theta_k} ] \leq \sigma^2$)
++ *BUT* this algorithm is biased
++ It's a drawback computationally to need to store a gradient table
+
+#### SAGA
+
+The SAGA algorithm is only a slightly modified version of SAG, with the only difference being a modification of the gradient estimate itself. We will still maintain our table of gradients, use the same initialization procedure, and pick/replace a random gradient in the same fashion.
+
+Instead, however, of the SAG gradient estimate $\hat{g} = \frac{1}{n} \left( g_k^{(i_k)} - g_{k-1}^{(i_k)}  \right) + \frac{1}{n} \sum_{i=1}^{n}{g_{k-1}^{(i)}}$, we use the following gradient estimate for SAGA.
+
+$$ \hat{g} = g_k^{(i_k)} - g_{k-1}^{(i_k)} + \frac{1}{n} \sum_{i=1}^{n}{g_{k-1}^{(i)}}  $$
+
+So, our per iteration updates are of the following form.
+
+$$ \boldsymbol{\theta}_{k}=\boldsymbol{\theta}_{k-1}- \alpha \left ( g_k^{(i_k)} - g_{k-1}^{(i_k)} + \frac{1}{n} \sum_{i=1}^{n}{g_k^{(i)}} \right ) $$
+
+SAGA can be shown to have the same convergence $\mathcal{O}(\frac{1}{T})$, but can use a slightly better learning rate $\alpha = \frac{1}{3L}$. It also does not require the bound on conditional variance. The most stark difference with SAGA vs. SAG is that SAGA is unbiased. It still has the less than desirable need to store a gradient table.
+
+Using the same definition for random varables $X$ and $Y$ as before, we have the following.
+
+$$ E[\hat{g}] = E[X] - E[Y] + E[Y] = E[X] = \nabla f(\boldsymbol{\theta_k}) $$
+
+So, $\hat{g}$ is an unbiased estimator for the gradient and it follows that the bias term $E[w_k | \boldsymbol{\theta}_{k}] = 0$ for this method.
+
+#### SAG & SAGA Variance comparison
+
+Recall the gradient estimates for each.
+
+**SAG**
+$$ \hat{g} = \frac{1}{n} \left( g_k^{(i_k)} - g_{k-1}^{(i_k)}  \right) + \frac{1}{n} \sum_{i=1}^{n}{g_{k-1}^{(i)}} $$
+
+**SAGA**
+$$ \hat{g} = g_k^{(i_k)} - g_{k-1}^{(i_k)} + \frac{1}{n} \sum_{i=1}^{n}{g_{k-1}^{(i)}}  $$
+
+For  $X = g_{k}^{(i_k)}$ and $Y = g_{k-1}^{(i_k)}$ where $X$ and $Y$ are correlated, we have the general form.
+
+$$ \hat{g}_{\alpha} = \alpha (X-Y) + \mathbb{E}[Y] $$
+
+Where $\alpha = 1$ for SAGA and $\alpha = \frac{1}{n}$ for SAG.
+
+Taking the variance, we have the following.
+
+$$ Var(\hat{g}_{\alpha}) = \alpha^2 (Var[X] + Var[Y] - 2 Cov[X,Y])$$
+
+So, we can compare the methods.
+
+$$\textbf{SAG: }Var(\hat{g}_{\alpha}) = \frac{1}{n^2} (Var[X] + Var[Y] - 2 Cov[X,Y])$$
+
+$$\textbf{SAGA: }Var(\hat{g}_{\alpha}) = (Var[X] + Var[Y] - 2 Cov[X,Y])$$
+
+SAGA's modified algorithm makes the iterations unbiased, however by doing so we increase variance in the steps. The SAG/SAGA has tradeoffs with bias and variance, but ultimately both converge at the same rate. In terms of MSE, this means we may not have an obvious advantage for either method other than the faster learning rate of SAGA.
+
+### Other Common Variance Reduction Techniques
+
+We have covered some basics of stochastic gradient descent algortihms, as well as some basic approaches to variance reduction, but I also wanted to include some supplemental material for further reading on the basics of the topics. If you are interested in learning more about some common techniques, I recommend [this paper on variance reduction techniques in machine learning](https://arxiv.org/abs/2010.00892).
+
+## SARAH
+
+SARAH, or StochAstic Recursive grAdient algoritHm, is a stochastic gradient descent method that utilizes *recursive gradient information* to reduce variance in the steps. The algorithm is a modification of the method SVRG (Stochastic Variance Reduced Gradient), which we will briefly cover, and is widely used as one of the benchmark algorithms for comparison to new gradient descent style methods. As with other methods we have seen until now, some of its core assumptions for convergence require a convex objective function (or strongly-convex) with Lipschitz continuous gradient. SARAH is a good example of an algorithm that is actually biased, but can be an improvement over SVRG if conditions are considered carefully.
+
+### Stochastic Variance Reduced Gradient (SVRG)
+
+To understand the SARAH algorithm, we need to first conceptually understand SVRG.  First, we present the SVRG algorithm.
+
+<div className="-mx-2 flex flex-wrap overflow-hidden xl:-mx-2">
+![SVRG algorithm](/static/files/ml_optimization/images/svrg_alg.png#center)
+</div>
+
+The algorithm consists of an *outer loop* and an *inner loop*, both with iterations specified as hyperparameters.  We select the number of epochs $T$ (each "epoch" is one pass over all samples in the dataset) for the outer loop, and the number of inner loop iterations $m$.
+
+The outer loop performs one full gradient computation using the initialized parameter $\tilde{\boldsymbol{\theta}}$, which begins with the initialized parameter $\tilde{\boldsymbol{\theta}}_0$ that is used to make one full gradient computation $\tilde{g}$ (hence outer loop "epochs"). $\tilde{\boldsymbol{\theta}}$ is then used to initialize the inner loop updates $\boldsymbol{\theta}_0$, and fed into the loop with $\tilde{g}$.
+
+The inner loop then begins, using a stochastic gradient approach in combination with an iteratively updated gradient estimate $v_{t-1} = \nabla f_{i_{t}} (\boldsymbol{\theta}_{t-1}) - \nabla f_{i_{t}} (\tilde{\boldsymbol{\theta}}) + \tilde{g}$, utilizing the outer loop full gradient $\tilde{g}$, the stochastic gradient computed from the most recent parameter update $\nabla f_{i_{t}} (\boldsymbol{\theta}_{t-1})$, and the corresponding full-gradient sample $\nabla f_{i_{t}} (\tilde{\boldsymbol{\theta}})$. The gradient estimate is then used for a normal gradient descent style parameter update.
+
+All parameter updates occur within the inner loop, and the resulting parameters from the inner loop get fed back into the outer loop as the new parameter initialization.
+
+
+#### SVRG Gradient Estimator
+
+We want to analyze our gradient estimate, so we take its expectation conditioned on knowledge of $\boldsymbol{\theta}_{t-1}$.
+
+$$ \mathbb{E} [v_{t-1}|\boldsymbol{\theta}_{t-1}] = \mathbb{E}[ \nabla f_{i_{t}} (\boldsymbol{\theta}_{t-1}) - \nabla f_{i_{t}} (\tilde{\boldsymbol{\theta}}) + \tilde{g} ] = \mathbb{E}[ \nabla f_{i_{t}} (\boldsymbol{\theta}_{t-1}) ] - \mathbb{E}[ \nabla f_{i_{t}} (\tilde{\boldsymbol{\theta}}) ] + \tilde{g} $$
+
+$$ = \underset{\nabla f (\boldsymbol{\theta}_{t-1})}{\underbrace{\frac{1}{n} \sum_{i=1}^{n}{\nabla f_{i_{t}}(\boldsymbol{\theta}_{t-1})}}} - \underset{\tilde{g}}{\underbrace{\frac{1}{n} \sum_{i=1}^{n}{\nabla f_{i_{t}} (\tilde{\boldsymbol{\theta}})}}} + \tilde{g} = \nabla f (\boldsymbol{\theta}_{t-1})$$
+
+So, the SVRG gradient estimator for the inner loop updates is *unbiased*.
+
+#### SVRG Variance Reduction
+
+The variance reduction for SVRG is accomplished with the inner loops by the convergence of both $\boldsymbol{\theta}_{t}$ and $\tilde{\boldsymbol{\theta}}$ to the same optimal parameter ${\theta}^{*}$. Omitting the detailed proof ([Johnson and Zhang](https://papers.nips.cc/paper/2013/file/ac1dd209cbcc5e5d1c6e28598e8cbbe8-Paper.pdf) CITE), the following holds for convex (and strongly convex) objective functions with Lipschitz continuous gradients.
+
+$$ \tilde{g} = \frac{1}{n} \sum_{i=1}^{n}{\nabla f_{i} (\tilde{\boldsymbol{\theta}})} \underset{\tilde{\theta}\rightarrow\theta^{*}}{\rightarrow} \frac{1}{n} \sum_{i=1}^{n}{\nabla f_{i} (\boldsymbol{\theta}^*)} \rightarrow 0  $$ 
+
+So if $\nabla f_{i} (\tilde{\boldsymbol{\theta}}) \rightarrow \nabla f_{i} (\boldsymbol{\theta}^*)$, then
+
+$$ v_{t-1} =  \nabla f_{i_{t}} (\boldsymbol{\theta}_{t-1}) - \nabla f_{i_{t}} (\tilde{\boldsymbol{\theta}}) + \tilde{g} \underset{\tilde{\theta}\rightarrow\theta^{*}\text{, } \theta_{t-1}\rightarrow\theta^{*}}{\rightarrow}  \nabla f_{i_{t}} (\boldsymbol{\theta}^{*}) - \nabla f_{i_{t}} (\boldsymbol{\theta}^{*})  \rightarrow 0$$
+
+This means that the variance of the gradient estimates approach zero as the parameter updates converge to the optimum $\boldsymbol{\theta}^{*}$, hence the inner loops serve as a variance reduction technique, but in order for overall variance in the steps to decrease we must update $\tilde{\boldsymbol{\theta}}$ (so that $\nabla f_{i} (\tilde{\boldsymbol{\theta}}) \rightarrow \nabla f_{i} (\boldsymbol{\theta}^*)$), meaning that we must execute additional full gradient computations (epochs). We will revisit this point in the analysis of [the variance reduction of SARAH](#sarah-variance-reduction).
+
+#### SVRG Convergence
+
+For convex and Lipschitz continuous gradient objective functions $f_i$, SVRG can be shown to converge at a rate of $\mathcal{O} (\frac{1}{T})$, which is an improvement over SGD's $\mathcal{O} (\frac{1}{\sqrt{T}})$. It also has better theoretical convergence, $\mathcal{O} (n\log\frac{1}{\epsilon} + \frac{L}{\epsilon})$, than SAG and SAGA, ($\mathcal{O} (\frac{n+L}{\epsilon})$) (*note convergence here is in terms of specified tolerance $\epsilon$ rather than number of iterations $T$*).
+
+For a [$\mu$-strongly](#convexity) convex objective function, SVRG converges to the following.
+
+Assume $m$ is sufficiently large such that the following holds.
+
+$$ \beta_m = \frac{1}{\mu \alpha (1-2L \alpha)m} + \frac{2L \alpha}{1-2L \alpha} < 1 $$
+
+then,
+
+$$ \mathbb{E} [f(\tilde{\boldsymbol{\theta}}_s)] - f(\boldsymbol{\theta}^*) \leq \beta^s (f(\tilde{\boldsymbol{\theta}}_s) - f(\boldsymbol{\theta}^*)) $$
+
+The complexity is $\mathcal{O}((n+\frac{L}{\mu}) \log(\frac{1}{\epsilon}))$, which is comparable to SAG/SAGA. This also gives us criteria for which to select inner loop size $m$ and learning rate $\alpha$.
+
+Unlike SGD, we do not need a decaying learning rate for SVRG to achieve the comparable convergence rate. The decaying learning rate required for SGD is a consequence of the variance in the steps (even though variance can be unbounded), which is a good example of how variance can impact convergence rate; SVRG explicitly reduces the variance in the steps of SGD.
+
+### The SARAH Algorithm
+
+Methodology in this section is drawn from *SARAH: A Novel Method for Machine Learning Problems Using Stochastic Recursive Gradient* ([Nguyen, Liu, Scheinberg, and Takáč, 2017](https://arxiv.org/abs/1703.00102))
+
+<div className="-mx-2 flex flex-wrap overflow-hidden xl:-mx-2">
+![SARAH algorithm](/static/files/ml_optimization/images/sarah_alg.png#center)
+</div>
+
+SARAH is very closely related to SVRG.  It utilizes the same outer/inner loop apprach that functionally serve the same purpose; the outer loop is used to compute a full gradient (a "snapshot" of the full gradient), and the inner loop performs SGD style steps with a variance reduction design. The key difference between SVRG and SARAH is in the gradient estimate update step in the inner loop.
+
+SVRG's gradient estimate is designed to use the outer loop "snapshot" to generate an unbiased gradient estimate at each step, while simultaneously reducing the variance that is a consequence of SGD. The "snapshot" is what stablizes the algorithm in terms of bias (the gradient estimate is unbiased) and allows the variance in the stochastic steps to be reduced using the parameters from which the outer loop was initialized.
+
+SARAH's gradient estimate, however, leans more heavily into the variance-reduction aspect of the algorithm by utilizing *recursive* gradient information to reduce variance, rather than solely using the gradient estimate from the outer loops. This improves the stochastic variance reduction power of the algorithm, but at the expense of introducing bias.
+
+#### SARAH Gradient Estimator
+
+The gradient estimate (also referred to as the "SARAH update") utilizes a similar framework to SVRG. Recall the SVRG gradient estimate.
+
+The SARAH estimator modifies the gradient estimate by replacing the gradient esimate terms from the outer loop initialization with a recursive gradient update.
+
+$$ v_{t-1} =  \nabla f_{i_{t}} (\boldsymbol{\theta}_{t-1}) - \underset{\text{outer loop terms}}{\underbrace{ \nabla f_{i_{t}} (\tilde{\boldsymbol{\theta}}) + \tilde{g}}} $$
+
+$$v_{t}=\nabla f_{i_{t}}(\theta_{t})-\nabla f_{i_{t}}(\theta_{t-1})+v_{t-1}$$
+
+We note that there is a shift in index as we now need to use both the most recent random gradient as well as the random gradient from the previous step. This also means that we must perform one parameter update in the outer loop before we enter the inner loop.
+
+Each gradient estimate uses every previous gradient estimate from the inner loop for each inner loop update, hence a "recursive" update framework as opposed to each update using the outer loop initialization only.
+
+Let's take the conditional expectation of the gradient estimate, given all previous iterates of $\boldsymbol{\theta}_{t}$. We will call this $\mathcal{F}_t$, the [$\sigma$-algebra](https://en.wikipedia.org/wiki/%CE%A3-algebra) generated by the inital $\boldsymbol{\theta}_{0}$ and all subsequent randomly chosen indices for the inner loop $\mathcal{F}_t = \sigma(\boldsymbol{\theta}_{0}, i_1,...,i_{t-1})$. Note that $\mathbb{E}[v_{t}|\mathcal{F}_t] = \mathbb{E}_{i_t}[v_{t}]$.
+
+$$ \mathbb{E}_{i_t}[v_{t}] = \nabla f(\theta_{t}) - \nabla f(\theta_{t-1}) + v_{t-1} \neq \nabla f(\theta_{t})$$
+
+The steps are omitted, but the result is notable as it is *not* an unbiased estimator for the gradient. However, the *total* expectation holds.
+
+$$ \mathbb{E}[v_t] = \nabla f(\theta_{t}) $$
+
+So, an exact full pass over the data for an inner loop is unbiased.
+
+#### SARAH Variance Reduction
+
+Recall for SVRG that in order for overall variance in the steps to reduce, [we must execute additional outer loops](#svrg-variance-reduction); in order for $\nabla f_{i} (\tilde{\boldsymbol{\theta}}) \rightarrow \nabla f_{i} (\boldsymbol{\theta}^*)$ to hold, we must update $\tilde{\boldsymbol{\theta}}$ via an outer loop computation.
+
+In the analysis of SVRG we showed that stochastic gradients are unbiased estimators for the full gradient, and that $\nabla f_{i_{t}} (\boldsymbol{\theta}^{*}) - \nabla f_{i_{t}} (\boldsymbol{\theta}^{*})  \rightarrow 0$. Since the inner loop terms only utilize stochastic gradients for the gradient estimate, the inner loops will reduce variance without requiring an outer loop as there are no terms in the estimator dependent upon the outer loop update.
+
+SARAH's variance bound in the $\mu$-strongly convex objective function case can be shown to be less than the variance bound of the same objective function with SVRG.
+
+$$ \sigma_{m}\stackrel{def}{=}\frac{1}{\mu\eta(m+1)}+\frac{\eta L}{2-\eta L}  <  \frac{1}{\mu\eta(1-2L\eta)m}+\frac{1}{\frac{1}{2\eta L}-1}=\beta_m $$
+
+SHOW IMAGE COMPARISON OF SVRG VS SARAH, MAYBE JUST PIC FROM PAPER?
+
+The variance reduction of the inner loops is at the expense of bias; SARAH reduces variance in the inner loops but now has bias that is itself stochastic. This bias can be somewhat "corrected" for, however, by executing an outer loop to reinitialize the parameters by pointing them in the correct direction. We will examine some intelligent ways to execute outer loops when necessary using [SARAH+](#sarah%2B-algorithm).
+
+#### SARAH Convergence
+
+For convex and Lipschitz continuous gradient objective functions $f_i$, SARAH can be shown to converge at a rate of $\mathcal{O}((n+\frac{1}{\epsilon}) \log(\frac{1}{\epsilon}))$. Better conditioned $f_i$s that are $\mu$-strongly convex converge at a rate of $\mathcal{O}((n+\frac{L}{\mu}) \log(\frac{1}{\epsilon}))$. 
+
+Comparing these rates directly to SVRG,
+
+| Convexity | SVRG | SARAH |
+| --- | --- | --- |
+| Convex | $\mathcal{O} (n\log\frac{1}{\epsilon} + \frac{L}{\epsilon})$ | $\mathcal{O}((n+\frac{1}{\epsilon}) \log(\frac{1}{\epsilon}))$ |
+| Strong Convexity  | $\mathcal{O}((n+\frac{L}{\mu}) \log(\frac{1}{\epsilon}))$ | $\mathcal{O}((n+\frac{L}{\mu}) \log(\frac{1}{\epsilon}))$ |
+
+Similar to SVRG, we must select our inner loop size $m$ and learning rate such that the following holds.
+
+$$ \sigma_{m}\stackrel{def}{=}\frac{1}{\mu\eta(m+1)}+\frac{\eta L}{2-\eta L} < 1 $$
+
+Recall from [above](#sarah-variance-reduction) that the variance bound for SARAH in the strongly convex case is smaller than that of SVRG. So, while their convergence complexity is the same for strong convexity, SARAH can use a larger learning rate than SVRG. SVRG must use a learning rate of $\eta < \frac{1}{4L}$ whereas SARAH can use $\eta < \frac{1}{L}$.
+
+So, there are some advantages to SARAH over SVRG, but not necessarily overwhelmingly so.
+
+#### SARAH+ Algorithm
+
+
+<div className="-mx-2 flex flex-wrap overflow-hidden xl:-mx-2">
+![SARAH+ algorithm](/static/files/ml_optimization/images/sarah+_alg.png#center)
+</div>
+
+[Nguyen et. al](https://arxiv.org/abs/1703.00102) present this variant of the SARAH algorithm that provides an automatic and adaptive inner loop size. Numerical experiments from the paper indicate a selection of $\gamma=1/8$ shows benefits in rate for their numerical experiments, but does not elaborate on any theory.
+
+This modification introduces an automated methodology for breaking the inner loop such that inner loop size $m$ can be adaptive. It also serves as automation to correct for bias in the inner loops with the execution of a full outer loop gradient.
+
+### Applications of SARAH
+
+In practice, SARAH can be a direct substitute for SVRG with only some updated parameter tuning considerations, so it can be utilized for a very large variety of applications as a SVRG replacement. However, it does not seem to be used as widely in practice as SVRG.  While speculation as to why is not worthwhile, it is noteworthy that SARAH's variance reduction technique utilizes a biased methodology, where SVRG is unbiased. SVRG is a widely utilized benchmark algorithm, and many machine learning packages have SVRG built in; the same cannot be said for SARAH, and while it does have theoretical advantages, it does not seem to have penetrated the infrastructure of optimization algorithms in practice. Still, there is a fair amount of research available for futher modifications of SARAH.  
+
+
+## ADAM
+
+Methodology in this section is drawn from *Adam: A Method for Stochastic Optimization* ([Diederik P. Kingma, Jimmy Ba, 2014](https://arxiv.org/abs/1412.6980)). 
+
+ADAM is a widely popular optimizer in machine learning. It is a staple for deep learning, neural networks, natural language processing, and generative adversarial networks applications, to name a few.  ADAM has some unique strengths against other optimizers; it is fast, requires little hyperparameter tuning, performs well with sparse gradients, and can be applied to stochastic objective functions. It is also an adaptive algorithm that uses adaptive step sizes according to data it has seen to speed up convergence. 
+
+The ADAM optimizer is a stochastic/batch gradient descent variant that utilizes two techniques that leverage previous gradient information (conceptually adjacent to recursion we saw in SARAH), **Momentum** and **RMSProp** (Root Mean Squared Propogation). Momentum acts to dampen oscillations by using previous gradient moving averages to decrease the variance in steps. RMSProp adaptively scales the learning rate based upon an exponential weighted average of the magnitude of recent gradients, so it can "speed up" and "slow down" such that it does not diverge from the local data. Additionally, ADAM can utilize batch gradients rather than only individual stochastic gradients, which can act as variance reduction by increasing sample size. 
+
+### The Algorithm
+
+<div className="-mx-2 flex flex-wrap overflow-hidden xl:-mx-2">
+![ADAM algorithm](/static/files/ml_optimization/images/adam_alg.png#center)
+</div>
+
+*Note $g_t^2$ is equivalent to element-wise multiplication of gradients $g_1 \odot g_2$*
+
+#### Variance Reduction
+
+##### Momentum
+
+Polyak's momentum is a technique that uses both the current gradient as well as the history of gradients in previous steps to accelerate convergence. The momentum term is incorporated in general with gradient descent style algorithm and uses a hyperparameter $\beta \in [0,1)$ to scale its weight.
+
+$$ \theta_{k+1} = \theta_{k} - \alpha \nabla f(\theta_k) + \beta(\theta_{k} - \theta_{k-1}) $$
+
+If we expand this term,
+
+$$ \theta_{k+1} = \theta_{k} - \alpha \nabla f(\theta_k) + \beta( \theta_{k-1} - \alpha \nabla f(\theta_{k-1}) + \beta(\theta_{k-1} - \theta_{k-2}) - \theta_{k-1}) $$
+$$ = \theta_{k} - \alpha \nabla f(\theta_k) - \beta \alpha \nabla f(\theta_{k-1}) + \underset{\text{higher order } \beta \text{ small}}{\underbrace{\beta^2(\theta_{k-1} - \theta_{k-2})}} $$
+
+If these recent gradients are similar, the algorithm gets an additional "boost", or "momentum". $\theta_{k-1}$ and so on can be expanded similarly, and we get higher order $\beta$ terms as the algorithm iterates. This favors the most recent gradients since $\beta \in [0,1)$ and higher order terms quickly dampen out previous iterates.
+
+<div className="-mx-2 flex flex-wrap overflow-hidden xl:-mx-2">
+![Momentum](/static/files/ml_optimization/images/momentumexampleplot.jpg#center)
+</div>
+
+In ADAM, the momentum term is written as follows.
+
+$$ m_{t} = \beta_{1} \cdot m_{t-1} + (1 - \beta_{1}) \cdot g_{t} $$
+
+Momentum helps to accelerate convergence, particularly over the contours of objective functions, while also acting as variance reduction in the steps. The technical details of variance reduction in stochastic methods are a little more involved and are covered in [Roux et. al, 2018](https://openreview.net/forum?id=r1qKBtJvG). For and in-depth and beautifully interactive blog about momentum, [I also suggest this post](https://distill.pub/2017/momentum/).
+
+##### Minibatches
+
+[Earlier in this post](#minibatch-sgd) we covered the variance reduction properties of using stochastic minibatches for variance reduction in the steps. ADAM utilizes minibatches, and the batch size is a tuneable hyperparameter. This gives us the ability to use better gradient approximations for our steps and balance convergence with computation time.
+
+#### RMSProp
+
+Root-mean-squared propograaion (RMSProp) is a technique that uses the moving average of the magnitude of recent squared gradients to normalize the gradient estimate in the descent algorithm. Its implementation in descent algorithms makes the learning rate adaptive to the data, rather than treating it as a constant tuneable hyperparameter. In essence, the learning rate will speed up or slow down depending on recent gradients.
+
+The RMSProp update is similar to momentum, using the squared gradient term.
+
+$$ v_{t} = \beta_{2} \cdot v_{t-1} + (1 - \beta_{2}) \cdot g_{t}^2 $$
+
+And the update rule in a gradient descent algorithm is written as follows.
+
+$$ \theta_{t} = \theta_{t-1} - \alpha \frac{\nabla f(\theta_k)}{\sqrt{v_{t-1}}+\epsilon}  $$
+
+The $\epsilon$ term only serves to stablize the algorithm as $v_t$ becomes small (the steps will become large if the denominator is small), preventing overshooting close to the optimum.
+
+#### Bias and Bias Correction
+
+The bias-correction steps in ADAM are enhancements to the momentum and RMSProp algorithms (which are themselves biased) and can be attributed to its advantageous performance with sparse data. ADAM is biased toward its initialization, which in general should be chosen to be the $\textbf{0}$ vector. 
+
+*We will follow the derivation of the bias terms as in Kingma and Ba (CITE).*
+
+Our momentum term $m_t$, or the first moment estimator, is meant to estimate the gradient $g_t$, so we want to find the expectation of the first moment estimate $E[m_t]$.
+
+Let's first consider running ADAM for $T$ timesteps, and let $g_1,...,g_T$ be the gradients at each timestep. We assume the gradients are distributed as $g_t \sim p(g_t)$. At timestep $t$, the first moment estimate term is the following.
+
+$$m_t = \beta_1 \cdot m_{t-1} + (1-\beta_1) \cdot g_t$$
+
+We initialize the first moment weights setting $m_{0}=\textbf{0}$ and expand this term by substituting $m_{t-1}$ with each previous timestep, we get
+
+$$ m_t = (1-\beta_1) \sum_{i=1}^{t}{\beta_1^{t-i} \cdot g_i } $$
+
+Now, we can then take the expectation of $m_t$.
+
+$$ \mathbb{E}[m_{t}] = \mathbb{E} \left[ (1-\beta_1) \sum_{i=1}^{t}{\beta_1^{t-i} \cdot g_i} \right] $$
+
+We can rewrite $\sum_{i=1}^{t}{\beta_1^{t-i} \cdot g_i}$ by adding and subtracting $g_t$, giving $\sum_{i=1}^{t}{\beta_1^{t-i} \cdot (g_i + g_t - g_t)}$, giving the following.
+
+$$\sum_{i=1}^{t}{\beta_1^{t-i} \cdot g_t} + \underset{\zeta}{\underbrace{\sum_{i=1}^{t}{\beta_{1}^{t-i}\cdot(g_{i}-g_{t})}}}$$
+
+Recent gradients will be close to $g_t$, and gradients further in the past will be quickly dampened by $\beta_1^{t-i}$ as it should be selected to be small, so the $\zeta$ term can be treated as small.  So, our expectation can be written as the following.
+
+$$ \mathbb{E}[m_{t}] = \mathbb{E} \left[ (1-\beta_1) \sum_{i=1}^{t}{\beta_1^{t-i} \cdot g_t} + \zeta \right] $$
+
+$$ = \mathbb{E}[g_t] \cdot (1-\beta_1) \sum_{i=1}^{t}{\beta_1^{t-i} } + \zeta $$
+
+Expanding the sum and cancellations of $\beta_1$ term results in the following.
+
+$$ \mathbb{E}[m_{t}] = \mathbb{E}[g_t] \cdot (1-\beta_1^t) + \zeta $$
+
+The calculation steps for the second moment estimates follow identical logic, and we get the following expectation for $v_{t}$.
+
+$$\mathbb{E}[v_{t}]=\mathbb{E}[g_{t}^{2}]\cdot(1-\beta_{2}^{t})+\zeta$$
+
+Clearly, $m_t$ is a biased estimator for $g_t$, and $v_t$ is biased for $g_t^2$.
+
+We can approximately correct for bias in each term by assuming initialization of moments to be zero, and by dividing the respective estimates by the $(1-\beta_{1}^t)$ and $(1-\beta_{2}^t)$ term for the first and second moment estimates respectively, giving approximately $\mathbb{E}[\hat{m}_{t}]=\mathbb{E}[g_{t}]$ and $\mathbb{E}[\hat{v}_{t}]=\mathbb{E}[g_{t}^{2}]$.
+
+#### ADAM Convergence
+
+ADAM requires only a basic convexity assumption of the objective function, and a similar but more relaxed assumption of Lipschitz continuity called $(L_0,L_1)$ smoothness ([Wang et al, 2022](https://arxiv.org/abs/2208.09900)). Foregoing the details, ADAM converges at a rate of $\mathcal{O}(\frac{1}{\sqrt{T}})$ (the detailed proof for ADAM's convergence can be found in [the original Kingma and Ba paper](https://arxiv.org/abs/1412.6980)).
+
+Recall that this is the same theoretical convergence rate as SGD, however it is able to used a fixed learning rate rather than a diminishing step size. While its rate is less desirable than other algorithms we have seen, it is still a widely desirable algorithm for it's performance in practice.
+
+### Applications of ADAM
+
+ADAM is a very widely used optimizer, particularly for neural network, deep learning, and natural language processing applications amongst others. One of its advantages is how well it handles sparse data, which are commonly characteristic of the data for these types of tasks. While it is not the fastest method in terms of convergence, the methodologies it utilizes to balance stochasic variance while also addressing inherent estimator bias, making this method a trustworthy workhorse.
+
+There is existing infrastructure for ADAM among some common machine learning tools like [Keras](https://keras.io/api/optimizers/adam/), [scikit-learn](https://scikit-learn.org/stable/modules/generated/sklearn.neural_network.MLPClassifier.html), [PyTorch](https://pytorch.org/docs/stable/generated/torch.optim.Adam.html), and [TensorFlow](https://www.tensorflow.org/api_docs/python/tf/keras/optimizers/Adam), to name some prolific packages in industry and research applications, so it has been embraced by the community as an effective optimizer. Overall it is a robust optimizer with reliable performance for convex ([as well as nonconvex](https://arxiv.org/abs/2307.11782)) objectives.
+
+
+## Example Numerical Experiments
+
+*This section was lifted directly from my coursework. Note this section uses $x$ for the model parameter vector instead of the $\theta$ we have been using previously (different choices may be seen in practice)*.
+
+The purpose of the numerical experiment will be to evaluate general performance of ADAM and SARAH on real data and to illustrate a bias-variance tradeoff between SVRG and SARAH.
+We use the "Wine Quality" dataset from the UC Irvine Machine Learning Repository **CITE winequality**. The data are measurements of wine characteristics (features) used to predict wine quality scores. There are $n=6497$ instances and $m=11$ features. The experiements will use a simple least squares linear regression objective, assuming a system with data $A$ and response $b$ is of the form $Ax=b$.
+
+$$\underset{x}{\text{min}}||Ax-b||^{2}$$
+
+The least squares objective was chosen because it is strongly convex.  $x^*$ was computed separately using `scipy.optimize.lsq_linear` with tolerance set to $1e-10$.
+
+![Numerical Experiment Figure 1](/static/files/ml_optimization/images/numexp1.png)
+
+![Numerical Experiment Figure 2](/static/files/ml_optimization/images/numexp2.png)
+
+See Figures 1 and 2 for settings and computation time. The two examples chosen illustrate some high level takeaways. In terms of per-iteration computational performance, both ADAM and SARAH are virtually identical to SVRG, though ADAM can become slightly slower for increased batch sizes. SARAH and SVRG are limited in flexibility for learning rate with this data since $L$ is large and learning rate is $\mathcal{O}(\frac{1}{L})$. Both are descending, but are moving extremely slowly toward $x^*$, and the larger learning rate for SARAH hardly presents an advantage. We can see benefit of the adaptive learning rate of ADAM for both Exp A and B; it is moving toward it much faster and it continues to descend as iterations increase ($||x_t-x^*||$ vs. epochs).
+
+Comparing SARAH and SVRG, we run the inner loop for half an epoch  in Exp. A and for 30 epochs in Exp. B.  The parameter choice in Exp. B adheres with SARAH's variance bound requirement $\sigma_{m}\stackrel{def}{=}\frac{1}{\mu\eta(m+1)}+\frac{\eta L}{2-\eta L} < 1$. Note that for this data, the iterations required for an $\epsilon$ accurate convergence with SARAH, for a reasonable choice of $\epsilon$, was prohibitive. In both Exp. A and B, $||x_t - x_{t-1}||$ is clearly smoother for SARAH than SVRG, however we observe that the number of effective passes over the data in the inner loop can matter. In both the $||Ax_t-b||$ and $||x_t-x^*||$ plots, SARAH will stray away from the optimal solution due to bias after around 4 epochs.  It is ultimately corrected by the second outer loop step, but we can see how the biased steps of the inner loop can cause SARAH drift, whereas SVRG continues to descend. As is the reality of statistics, we are trading variance for bias.
+
+
+
+## Supplemental Resources
+
++ [Gradient descent, how neural networks learn | Chapter 2, Deep learning](https://www.youtube.com/watch?v=IHZwWFHWa-w)
+    + 3Blue1Brown video covering the basics of gradient descent in deep learning out of his Deep Learning series. Of course, I strongly recommend any of his excellent videos. 
++ [Stochastic Gradient Descent, Clearly Explained!!!](https://www.youtube.com/watch?v=vMh0zPT0tLI)
+    + A fun StatQuest video about stochastic gradient descent.
++ [Adam Optimizer Explained in Detail | Deep Learning - Coding Lane](https://youtu.be/tuU59-G1PgU?si=W2C6yyhL7ICHy3-S)
+    + A good simplified breakdown of ADAM optimizaiton
++ [Goh, "Why Momentum Really Works", Distill, 2017. http://doi.org/10.23915/distill.00006](https://distill.pub/2017/momentum/)
+    + A really nice (deep dive) post about Momentum, a stochastic variance reduction technique
++ [Lipschitz Functions: Intro and Simple Explanation for Usefulness in Machine Learning](https://www.youtube.com/watch?v=UjvFFXakMks&t=418s)
+    + Learn about Lipschitz continuous functions and their uses in machine learning
++ [L20.4 On the Mean Squared Error of an Estimator](https://www.youtube.com/watch?v=lET4uQLpmM0)
+    + MIT Open Courseware video about MSE
++ [Notes on "Big O" notation](http://web.mit.edu/16.070/www/lecture/big_o.pdf)
+    + "Big O" is standard notation to describe convergence for machine learning algorithms
+
+### Bibliography
+
+The information presented in this blog draws primarily from their original respective publications below.
+
+**ADAM**
++ [D. P. Kingma and J. Ba, Adam: A method for stochastic optimization, 2017.](https://arxiv.org/abs/1412.6980)
+
+**SARAH**
++ [L. M. Nguyen, J. Liu, K. Scheinberg, and M. Takáč, Sarah: A novel method for machine learning problems using stochastic recursive gradient, 2017.](https://arxiv.org/abs/1703.00102)
+
++ *Johnson, Rie, and Tong Zhang. “Accelerating stochastic gradient descent using predictive variance reduction."
+Advances in neural information processing systems 26 (2013). GET THE CORRECT CITATION (SVRG)
+
++ Roux, N. L., Babanezhad, R., and Manzagol, P.-A. Online variance-reducing optimization, 2018. URL https:// openreview.net/forum?id=r1qKBtJvG.
+
+## Appendix
+
+### Gradient Calculation
+
+### Convexity
+
+### Consistency
+
+Informally, a *consistent* estimator just means that if we use more data to estimate a parameter, it is guaranteed to converge to the true value of the parameter.
+DEFINITIONS OF CONVEX FUNCTIONS
+
