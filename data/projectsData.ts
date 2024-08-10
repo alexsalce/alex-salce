@@ -10,7 +10,7 @@ const projectsData: Project[] = [
     title: 'Machine Learning Optimization',
     description: `A dive into techniques and statistical background in machine learning optimization, with focus upon stochastic gradient descent, variance reduction techniques, and the bias-variance tradeoff`,
     imgSrc: '/static/files/ml_optimization/images/ml_opt_link.gif',
-    href: 'blog/ml_optimization',
+    href: 'blog/mloptimization',
   },
   {
     title: 'Machine Learning and NBA Statistics',
