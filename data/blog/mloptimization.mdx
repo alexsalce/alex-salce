@@ -2,10 +2,11 @@
 title: Machine Learning Optimization - Stochastic Descent, Variance Reduction Techniques, and the Bias-Variance Tradeoff
 date: 'April 2024'
 tags: ['SDS program', 'machine learning', 'optimization', 'gradient descent', 'variance reduction', 'stochastic gradient descent', 'statistics', 'python']
-draft: false
-summary: A dive into techniques and statistical background in machine learning optimization, with focus upon stochastic gradient descent, variance reduction techniques, and the bias-variance tradeoff.
 layout: PostBanner
 images: ['/static/files/ml_optimization/images/ml_optimizationheader.png']
+draft: false
+summary: A dive into techniques and statistical background in machine learning optimization, with focus upon stochastic gradient descent, variance reduction techniques, and the bias-variance tradeoff.
+bibliography: /bib/mloptimization.bib
 ---
 
 ## Introduction
@@ -669,7 +670,9 @@ Unlike SGD, we do not need a decaying learning rate for SVRG to achieve the comp
 
 ### The SARAH Algorithm
 
-Methodology in this section is drawn from *SARAH: A Novel Method for Machine Learning Problems Using Stochastic Recursive Gradient* ([Nguyen, Liu, Scheinberg, and Takáč, 2017](https://arxiv.org/abs/1703.00102))
+Methodology in this section is drawn from *SARAH: A Novel Method for Machine Learning Problems Using Stochastic Recursive Gradient* [@nguyen]
+
+([Nguyen, Liu, Scheinberg, and Takáč, 2017](https://arxiv.org/abs/1703.00102))
 
 <div className="-mx-2 flex flex-wrap overflow-hidden xl:-mx-2">
 ![SARAH algorithm](/static/files/ml_optimization/images/sarah_alg.png#center)
@@ -992,6 +995,8 @@ Comparing SARAH and SVRG, we run the inner loop for half an epoch  in Exp. A and
     + "Big O" is standard notation to describe convergence for machine learning algorithms
 
 ### Bibliography
+
+[^ref]
 
 The information presented in this blog draws primarily from their original respective publications below.
 
