@@ -624,7 +624,7 @@ So, the SVRG gradient estimator for the inner loop updates is *unbiased*.
 
 #### SVRG Variance Reduction
 
-The variance reduction for SVRG is accomplished with the inner loops by the convergence of both $\boldsymbol{\theta}_{t}$ and $\tilde{\boldsymbol{\theta}}$ to the same optimal parameter ${\theta}^{*}$. Omitting the detailed proof ([Johnson and Zhang](https://papers.nips.cc/paper/2013/file/ac1dd209cbcc5e5d1c6e28598e8cbbe8-Paper.pdf) CITE), the following holds for convex (and strongly convex) objective functions with Lipschitz continuous gradients.
+The variance reduction for SVRG is accomplished with the inner loops by the convergence of both $\boldsymbol{\theta}_{t}$ and $\tilde{\boldsymbol{\theta}}$ to the same optimal parameter ${\theta}^{*}$. Omitting the detailed proof [@Johnson] ([link](https://papers.nips.cc/paper/2013/file/ac1dd209cbcc5e5d1c6e28598e8cbbe8-Paper.pdf)), the following holds for convex (and strongly convex) objective functions with Lipschitz continuous gradients.
 
 $$
 \begin{aligned}
@@ -670,7 +670,7 @@ Unlike SGD, we do not need a decaying learning rate for SVRG to achieve the comp
 
 ### The SARAH Algorithm
 
-Methodology in this section is drawn from *SARAH: A Novel Method for Machine Learning Problems Using Stochastic Recursive Gradient* [@nguyen]
+Methodology in this section is drawn from *SARAH: A Novel Method for Machine Learning Problems Using Stochastic Recursive Gradient* [@nguyen] ([link](https://arxiv.org/abs/1703.00102))
 
 ([Nguyen, Liu, Scheinberg, and Takáč, 2017](https://arxiv.org/abs/1703.00102))
 
@@ -783,7 +783,7 @@ In practice, SARAH can be a direct substitute for SVRG with only some updated pa
 
 ## ADAM
 
-Methodology in this section is drawn from *Adam: A Method for Stochastic Optimization* ([Diederik P. Kingma, Jimmy Ba, 2014](https://arxiv.org/abs/1412.6980)). 
+Methodology in this section is drawn from *Adam: A Method for Stochastic Optimization* [@kingma] ([link](https://arxiv.org/abs/1412.6980)). 
 
 ADAM is a widely popular optimizer in machine learning. It is a staple for deep learning, neural networks, natural language processing, and generative adversarial networks applications, to name a few.  ADAM has some unique strengths against other optimizers; it is fast, requires little hyperparameter tuning, performs well with sparse gradients, and can be applied to stochastic objective functions. It is also an adaptive algorithm that uses adaptive step sizes according to data it has seen to speed up convergence. 
 
@@ -837,7 +837,7 @@ $$
 \end{aligned}
 $$
 
-Momentum helps to accelerate convergence, particularly over the contours of objective functions, while also acting as variance reduction in the steps. The technical details of variance reduction in stochastic methods are a little more involved and are covered in [Roux et. al, 2018](https://openreview.net/forum?id=r1qKBtJvG). For and in-depth and beautifully interactive blog about momentum, [I also suggest this post](https://distill.pub/2017/momentum/).
+Momentum helps to accelerate convergence, particularly over the contours of objective functions, while also acting as variance reduction in the steps. The technical details of variance reduction in stochastic methods are a little more involved and are covered in [@arnold2019] ([link](https://openreview.net/forum?id=r1qKBtJvG)). For and in-depth and beautifully interactive blog about momentum, [I also suggest this post](https://distill.pub/2017/momentum/).
 
 ##### Minibatches
 
@@ -869,7 +869,7 @@ The $\epsilon$ term only serves to stablize the algorithm as $v_t$ becomes small
 
 The bias-correction steps in ADAM are enhancements to the momentum and RMSProp algorithms (which are themselves biased) and can be attributed to its advantageous performance with sparse data. ADAM is biased toward its initialization, which in general should be chosen to be the $\textbf{0}$ vector. 
 
-*We will follow the derivation of the bias terms as in Kingma and Ba (CITE).*
+*We will follow the derivation of the bias terms as in* @kingma
 
 Our momentum term $m_t$, or the first moment estimator, is meant to estimate the gradient $g_t$, so we want to find the expectation of the first moment estimate $E[m_t]$.
 
@@ -957,7 +957,7 @@ There is existing infrastructure for ADAM among some common machine learning too
 *This section was lifted directly from my coursework. Note this section uses $x$ for the model parameter vector instead of the $\theta$ we have been using previously (different choices may be seen in practice)*.
 
 The purpose of the numerical experiment will be to evaluate general performance of ADAM and SARAH on real data and to illustrate a bias-variance tradeoff between SVRG and SARAH.
-We use the "Wine Quality" dataset from the UC Irvine Machine Learning Repository **CITE winequality**. The data are measurements of wine characteristics (features) used to predict wine quality scores. There are $n=6497$ instances and $m=11$ features. The experiements will use a simple least squares linear regression objective, assuming a system with data $A$ and response $b$ is of the form $Ax=b$.
+We use the "Wine Quality" dataset from the UC Irvine Machine Learning Repository [@winequality]. The data are measurements of wine characteristics (features) used to predict wine quality scores. There are $n=6497$ instances and $m=11$ features. The experiements will use a simple least squares linear regression objective, assuming a system with data $A$ and response $b$ is of the form $Ax=b$.
 
 $$
 \begin{aligned}
@@ -998,20 +998,9 @@ Comparing SARAH and SVRG, we run the inner loop for half an epoch  in Exp. A and
 
 [^ref]
 
-The information presented in this blog draws primarily from their original respective publications below.
-
-**ADAM**
-+ [D. P. Kingma and J. Ba, Adam: A method for stochastic optimization, 2017.](https://arxiv.org/abs/1412.6980)
-
-**SARAH**
-+ [L. M. Nguyen, J. Liu, K. Scheinberg, and M. Takáč, Sarah: A novel method for machine learning problems using stochastic recursive gradient, 2017.](https://arxiv.org/abs/1703.00102)
-
-+ *Johnson, Rie, and Tong Zhang. “Accelerating stochastic gradient descent using predictive variance reduction."
-Advances in neural information processing systems 26 (2013). GET THE CORRECT CITATION (SVRG)
-
-+ Roux, N. L., Babanezhad, R., and Manzagol, P.-A. Online variance-reducing optimization, 2018. URL https:// openreview.net/forum?id=r1qKBtJvG.
-
 ## Appendix
+
+Supplemental information.
 
 ### Gradient Calculation
 

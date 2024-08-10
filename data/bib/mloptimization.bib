@@ -5,7 +5,8 @@
       year={2017},
       eprint={1703.00102},
       archivePrefix={arXiv},
-      primaryClass={stat.ML}
+      primaryClass={stat.ML},
+      url={https://arxiv.org/abs/1703.00102}, 
 }
 
 @misc{kingma,
@@ -155,5 +156,29 @@ author = {Zhuang Yang},
   year = {2009},
   howpublished = {UCI Machine Learning Repository},
   note = {{DOI}: https://doi.org/10.24432/C56S3T}
+}
+
+@inproceedings{Johnson,
+author = {Johnson, Rie and Zhang, Tong},
+title = {Accelerating stochastic gradient descent using predictive variance reduction},
+year = {2013},
+publisher = {Curran Associates Inc.},
+address = {Red Hook, NY, USA},
+abstract = {Stochastic gradient descent is popular for large scale optimization but has slow convergence asymptotically due to the inherent variance. To remedy this problem, we introduce an explicit variance reduction method for stochastic gradient descent which we call stochastic variance reduced gradient (SVRG). For smooth and strongly convex functions, we prove that this method enjoys the same fast convergence rate as those of stochastic dual coordinate ascent (SDCA) and Stochastic Average Gradient (SAG). However, our analysis is significantly simpler and more intuitive. Moreover, unlike SDCA or SAG, our method does not require the storage of gradients, and thus is more easily applicable to complex problems such as some structured prediction problems and neural network learning.},
+booktitle = {Proceedings of the 26th International Conference on Neural Information Processing Systems - Volume 1},
+pages = {315–323},
+numpages = {9},
+location = {Lake Tahoe, Nevada},
+series = {NIPS'13}
+}
+
+@misc{arnold2019,
+      title={Reducing the variance in online optimization by transporting past gradients}, 
+      author={Sébastien M. R. Arnold and Pierre-Antoine Manzagol and Reza Babanezhad and Ioannis Mitliagkas and Nicolas Le Roux},
+      year={2019},
+      eprint={1906.03532},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG},
+      url={https://arxiv.org/abs/1906.03532}, 
 }
 
