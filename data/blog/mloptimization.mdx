@@ -42,7 +42,7 @@ This example is using some contrived data, but the settings for each algorithm a
 
 ## Crash Course: Gradient Descent
 
-*This section is some entry-level background to machine learning concepts, so please skip if you already have a grasp.*
+*This section is some entry-level background to machine learning concepts, [so please skip if you already have a grasp](#stochastic-gradient-descent).*
 
 The goal in machine learning optimization is to "train" model parameters for a machine learning model we choose to use, which will ultimately depend on the application. We will use the simple but very commonly used linear model as an example.
 
@@ -124,8 +124,6 @@ We then initialize a slope and intercept for $\boldsymbol{\theta_0} = \left[\beg
 0
 \end{array}\right]$), select a learning rate $\alpha=0.1$ (we will discuss how to more carefully select this hyperparameter later), and perform the gradient descent algorithm for $t=100$ steps (iterations). Below we animate the process, where the top plot is the line being fitted, the middle plot is the value of our loss gradually minimizing, and the last plot is the values for the slope and intercept.
 
-ADD LOSS FUNCTION PLOT TO THIS ANIMATION?
-
 <div className="-mx-2 flex flex-wrap justify-center overflow-hidden xl:-mx-2">
 ![GD Least Squares fit](/static/files/ml_optimization/images/gdlsfit.gif#center)
 </div>
@@ -141,7 +139,7 @@ There are a few observations we can note here.
 + Loss also falls steeply intially, but after around 10 steps it levels off around 1 (the variance of the noise of the data itself).
 + 100 steps is not enough to get all the way to true optimal solution.
 
-In short, we are seeing the parameters converge toward the optimal solution as the algorithm iterates, but it doesn't get us quite to the exact solution that is underlying the noise. When training a machine learning model, this isn't necessarily a bad thing. In fact, models that are not "overfit" to training data, i.e. fit "too closely" to the training data, often generalize better to make predictions for unseen data than models that match too closely with the training data.  We may only care that the model weights we use are within some guaranteed tolerance of the true solution (an example is included in the third plot), which can be proven to be the case for gradient descent with convex $f$ (see [here]() FOR MORE DETAILS).
+In short, we are seeing the parameters converge toward the optimal solution as the algorithm iterates, but it doesn't get us quite to the exact solution that is underlying the noise. When training a machine learning model, this isn't necessarily a bad thing. In fact, models that are not "overfit" to training data, i.e. fit "too closely" to the training data, often generalize better to make predictions for unseen data than models that match too closely with the training data.  We may only care that the model weights we use are within some guaranteed tolerance of the true solution (an example is included in the third plot), which we typically express in convergence rates in terms of a tolerance $\epsilon$. We will see $\epsilon$ accuracy convergence properties, or convergence properties expressed in terms of total iterations $T$ for the algorithms we cover in this post.
 
 #### Limitations of Regular Gradient Descent 
 
@@ -163,9 +161,9 @@ $$
 \end{aligned}
 $$
 
-*See [Appendix](#full-gradient-calculation) for more details on full and stochastic gradient calculation*.
+*See [appendix](#full-gradient-calculation) for more details on full and stochastic gradient calculation*.
 
-In terms of complexity, each step has $p \cdot n$ calculations per step. It can be shown that since $f$ is convex and Lipschitz continuous, for $\alpha$ selected carefully using what is called the Lipschitz constant $L$ ([you can learn more about Lipschitz continuity here](https://www.youtube.com/watch?v=UjvFFXakMks&t=418s)), that after $T$ iterations the following will hold.
+In terms of complexity, each step has $p \cdot n$ calculations per step. It can be shown that since $f$ is convex and Lipschitz continuous, for $\alpha$ selected carefully using what is called the Lipschitz constant $L$ ([you can learn more about Lipschitz continuity here](https://www.youtube.com/watch?v=UjvFFXakMks&t=418s) or in the [appendix](#lipschitz-continuity)) , that after $T$ iterations the following will hold.
 
 $$
 \begin{aligned}
@@ -202,7 +200,7 @@ Stochastic methods are common in many areas of computational mathematics and are
 
 The core concept of stochastic gradient descent is straightforward -- rather than performing a full gradient calculation at each timestep of gradient descent, we can sample individual gradients $\nabla f_i$'s (where $i$ is selected uniformly at random from $1,...n$) in lieu of computing the full gradient $\nabla f$. We use a randomly sampled $\nabla f_i$ at each step as a general approximation for the full gradient $\nabla f$ in the descent algorithm to step toward the solution at significantly reduced computational cost, with the concession that the step is an approximation. 
 
-*See [Appendix](#stochastic-gradient-calculation) for more details on stochastic gradient calculation*.
+*See [appendix](#stochastic-gradient-calculation) for more details on stochastic gradient calculation*.
 
 So, we would like to show that this randomly sampled gradient is a valid estimator of the true gradient.
 
@@ -248,9 +246,17 @@ So, an individual gradient is an unbiased estimator for the full gradient, a fun
 
 This presents a great computational advantage -- since we are selecting an individual gradient at random $\nabla f_{i_{k}}$, $i_{k} \in \{1,...,n\}$ for each iteration of SGD, it doesn't matter what the sample size of our data is. The sample size of the data $n$ could be very large and an SGD computation will "cost" the same per iteration.
 
-ADD SOME VISUAL EXAMPLE OF SGD HERE
+<div className="-mx-2 flex flex-wrap overflow-hidden xl:-mx-2">
+  <div className="my-1 w-full overflow-hidden px-2 xl:my-1 xl:w-1/2 xl:px-2">
+    ![SGD](/static/files/ml_optimization/images/stochasticgds_sgdfast.gif)
+  </div>
+  <div className="my-1 w-full overflow-hidden px-2 xl:my-1 xl:w-1/2 xl:px-2">
+    ![Compare](/static/files/ml_optimization/images/stochasticgds.gif)
+  </div>
+</div>
 
-TALK ABOUT VARIANCE IN THE STEPS
+On the left, we see the SGD optimizer algorithm stepping the parameters toward the solution in some obviously approximate ways. On the right, we also impose other algorithms that we will revisit later that use variance reduction technniques for comparison.
+
 Since we are now taking steps in our descent algorithm using approximations of the gradient, we are going to be taking steps only approximately in the direction of the optimum.
 
 ### SGD Convergence and Variance
@@ -375,7 +381,7 @@ $$
 \end{aligned}
 $$
 
-*See [Appendix](#batch-gradient-calculation) for example calculation details*
+*See [appendix](#batch-gradient-calculation) for example calculation details*
 
 We first take the conditional expectation modified from SGD. Note, as with SGD the gradient estimate is unbiased $E[\frac{1}{b} \underset{i \in I_k}{\sum} \nabla f_{i_{k}}(\boldsymbol{\theta}_{k})] = \nabla f(\boldsymbol{\theta}_{k})$.
 
@@ -398,7 +404,19 @@ We can reduce the variance bound by a factor of batch size be $b$. Since the est
 
 The tradeoff here, though, is a more expensive gradient computation by a factor of $b$ at each timestep. No free lunch! A convergence analysis will show that minibatch SGD converges at a rate  $\mathcal{O}(\frac{1}{\sqrt{T}})$, which is the same as SGD but at greater expense computationally due to the batch size. It's largely considered a compromise between SGD and regular gradient descent.
 
-COMPARISON BETWEEN BATCH SIZES ANIMATION
+<div className="-mx-2 flex flex-wrap overflow-hidden xl:-mx-2">
+  <div className="my-1 w-full overflow-hidden px-2 xl:my-1 xl:w-1/3 xl:px-2">
+    ![batchsize=100](/static/files/ml_optimization/images/adambs100.png)
+  </div>
+  <div className="my-1 w-full overflow-hidden px-2 xl:my-1 xl:w-1/3 xl:px-2">
+    ![batchsize=10](/static/files/ml_optimization/images/adambs10.png)
+  </div>
+    <div className="my-1 w-full overflow-hidden px-2 xl:my-1 xl:w-1/3 xl:px-2">
+    ![batchsize=2](/static/files/ml_optimization/images/adambs2.png)
+  </div>
+</div>
+
+The [ADAM](#adam) optimizer, which we will see in greater detail later, utilizes batch gradients. The above graphs demonstrate the effects of variance reduction for increasing batch sizes. The first plot uses a batch size of $b=100$, the second $b=10$, and the last $b=2$. Clearly, we get closest to our optimal solution using bigger batches to reduce variance in the steps, but what this does not capture is additional computational cost for each step. Ultimately, we tune parameters like batch size to find a balance between performance and results.
 
 ### Stochastic Average Gradient (SAG) and SAGA
 
@@ -739,7 +757,7 @@ $$
 \end{aligned}
 $$
 
-SHOW IMAGE COMPARISON OF SVRG VS SARAH, MAYBE JUST PIC FROM PAPER?
+SHOW IMAGE COMPARISON OF SVRG VS SARAH, MAYBE JUST PIC FROM PAPER? FINDME
 
 The variance reduction of the inner loops is at the expense of bias; SARAH reduces variance in the inner loops but now has bias that is itself stochastic. This bias can be somewhat "corrected" for, however, by executing an outer loop to reinitialize the parameters by pointing them in the correct direction. We will examine some intelligent ways to execute outer loops when necessary using [SARAH+](#sarah%2B-algorithm).
 
@@ -826,9 +844,16 @@ $$
 
 If these recent gradients are similar, the algorithm gets an additional "boost", or "momentum". $\theta_{k-1}$ and so on can be expanded similarly, and we get higher order $\beta$ terms as the algorithm iterates. This favors the most recent gradients since $\beta \in [0,1)$ and higher order terms quickly dampen out previous iterates.
 
-<div className="-mx-2 flex flex-wrap justify-center overflow-hidden xl:-mx-2">
-![Momentum](/static/files/ml_optimization/images/momentumexampleplot.jpg#center)
+<div className="-mx-2 flex flex-wrap overflow-hidden xl:-mx-2">
+  <div className="my-1 w-full overflow-hidden px-2 xl:my-1 xl:w-1/2 xl:px-2">
+    ![Momentum](/static/files/ml_optimization/images/momentumexampleplot.jpg)
+  </div>
+  <div className="my-1 w-full overflow-hidden px-2 xl:my-1 xl:w-1/2 xl:px-2">
+    ![Compare ADAM momentum](/static/files/ml_optimization/images/stochasticgds.gif)
+  </div>
 </div>
+
+*We see the "boost" in the animation for the ADAM algorithm compared to other stochastic methods, moving more rapidly toward the solution.*
 
 In ADAM, the momentum term is written as follows.
 
@@ -1001,7 +1026,75 @@ Comparing SARAH and SVRG, we run the inner loop for half an epoch  in Exp. A and
 
 ## Appendix
 
-Supplemental information.
+Some supplemental information for the topics we have covered.
+
+### Convexity
+
+#### Convex Function
+
+A function $f: \mathbb{R}^n \rightarrow \mathbb{R}$ is convex if it satisfies the following.
+
+$$
+\begin{aligned}
+f(\alpha x + (1-\alpha)y) \leq \alpha f(x) + (1-\alpha)f(y) \text{,   } \forall \alpha \in (0,1),x,y \in \mathbb{R}^n
+\end{aligned}
+$$
+
++ $f$ is convex if and only if for all $x$, $y$,
+$$
+\begin{aligned}
+f(y)\ge f(x)+\nabla f(x){}^{T}(y-x)
+\end{aligned}
+$$
+
++ $f$ is *strictly* convex if and only if for all $x$, $y$,
+$$
+\begin{aligned}
+f(y) > f(x)+\nabla f(x){}^{T}(y-x)
+\end{aligned}
+$$
+
++ $f$ is $\mu$-*strongly* convex if and only if there exists a $\mu>0$ such that for all $x$, $y$,
+$$
+\begin{aligned}
+f(y) \geq f(x)+\nabla f(x){}^{T}(y-x) + \frac{\mu}{2} ||x-y||^2
+\end{aligned}
+$$
+
++ If the objective function $f$ is convex, then any local minimum is a global minimum.
++ If the objective function $f$ is *strictly* convex, then the minimum is unique.
++ If the objective function $f$ is *strongly* convex, then the minimum is unique.
+
+*Return to*
++ [Gradient Descent in Machine Learning](#gradient-descent-in-machine-learning)
++ [SVRG Convergence](#svrg-convergence)
+
+### Lipschitz Continuity
+
+For the following convex optimization problem,
+
+$$
+\begin{aligned}
+\min_x f(x)
+\end{aligned}
+$$
+
++ $f$ has a Lipschitz-continuous gradient if there exists $L>0$ such that
+
+$$
+\begin{aligned}
+|| \nabla f(x) - \nabla f(y) || \leq L ||x-y|| \text{,   } \forall x,y \in \mathbb{R}
+\end{aligned}
+$$
+
++ If $f$ is twice differentiable such that $|| \nabla^2 f(x) || \leq L$ for all $x$ and some $L>0$, then $f$ has a Lipschitz continuous gradient with constant $L$.
+
+*Return to*
++ [Limitations of Regular Gradient Descent](#limitations-of-regular-gradient-descent)
+
+### Consistency
+
+Informally, a *[consistent estimator](https://en.wikipedia.org/wiki/Consistent_estimator)* just means that if we use more data to estimate a parameter, it is guaranteed to converge to the true value of the parameter.
 
 ### Gradient Calculation
 For simplicity, we are using the least squares loss objective function $f$.
@@ -1203,11 +1296,5 @@ Which results in the average of the selected gradients.
 *Return to*
 + [Minibatch SGD](#minibatch-sgd)
 
-### Convexity
-DEFINITIONS OF CONVEX FUNCTIONS
-
-### Consistency
-
-Informally, a *consistent* estimator just means that if we use more data to estimate a parameter, it is guaranteed to converge to the true value of the parameter.
 
 
