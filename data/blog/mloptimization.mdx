@@ -31,14 +31,13 @@ Optimization as a field has become critical to recent progress in machine learni
 
 When optimizing machine learning model parameters, first-order gradient descent algorithms utilizing stochastic gradients (individual gradient selected uniformly at random), or minibatch gradients (subsets of a full gradient whose elements selected uniformly at random), have become core staples in marchine learning frameworks due to their advantageous computational efficiency for applications to datasets of both large sample size and dimensionality. But, the randomness (variance) in the steps that is introduced to these gradient descent methods with stochasticity tends to slow down or inhibit convergence of the algorithms, so it is in our interest to implement techniques to curb this variance.
 
-NEED A BETTER IMAGE HERE
-
-<div className="-mx-2 flex flex-wrap overflow-hidden xl:-mx-2">
-![SARAH and GD](/static/files/ml_optimization/images/sarah_gd.png#center)
+<div className="-mx-2 flex flex-wrap justify-center overflow-hidden xl:-mx-2">
+![stochasics](/static/files/ml_optimization/images/stochastics1.png#center)
 </div>
 
-UPDATE EXAMPLE DESCRIPTION
-This is just a visual example we will later revisit; the stochastic SARAH method (green) steps randomly toward the solution in the middle, but overall does arrive close to it. Any steps not directly toward the solution can be considered variance in the algorithm's steps. For comparison, regular gradient descent (blue) steps only in the direction of the optimal solution. For algorithms utilizing stochastic approaches, controlling variance can be critical to guaranteeing convergence, which has motivated variance reduction techniques in the development of new stochastic optimization algorithms.
+This is a visual example of the topics and algorithms we intend to cover. The graph depicts model parameters for a two parameter model (training to correlated noise) as they iteratively update toward the true parameters using different variants of stochastic gradient descent (SGD, yellow line) that each employ different techniques to reduce variance in the parameter updates. Variance, as we will discuss in this post, is the quantity describing the magnitude of the randomness in the algorithms' steps to the true solution. SGD clearly has the highest variance, and the other variance reduction techniques have obviously smaller variance in their steps. 
+
+This example is using some contrived data, but the settings for each algorithm are approximately analagous (we'll see what "approximately" means as the algorithms are different in methodology), and they are running for the same number of iterations. We can see that the methods with smaller variance end up closer to the solution, which encapsulates our general motivation for utilizing variance reduction techniques in stochastic gradient descent style algorithms.  If we reduce variance in the steps, we can be more efficient about converging to the true solution. We will dive into some of these techniques and their underlying theory to better understand how we can balance variance reduction with convergence properties, algorithm computational efficiency, and unintended bias that can be a byproduct of these methodologies.
 
 
 ## Crash Course: Gradient Descent
@@ -127,7 +126,7 @@ We then initialize a slope and intercept for $\boldsymbol{\theta_0} = \left[\beg
 
 ADD LOSS FUNCTION PLOT TO THIS ANIMATION?
 
-<div className="-mx-2 flex flex-wrap overflow-hidden xl:-mx-2">
+<div className="-mx-2 flex flex-wrap justify-center overflow-hidden xl:-mx-2">
 ![GD Least Squares fit](/static/files/ml_optimization/images/gdlsfit.gif#center)
 </div>
 
@@ -163,6 +162,8 @@ $$
     \nabla f_i (\boldsymbol{\theta_t}) = \frac{d}{d\theta} (||a_i\boldsymbol{\theta_t}-b_i||^{2})
 \end{aligned}
 $$
+
+*See [Appendix](#full-gradient-calculation) for more details on full and stochastic gradient calculation*.
 
 In terms of complexity, each step has $p \cdot n$ calculations per step. It can be shown that since $f$ is convex and Lipschitz continuous, for $\alpha$ selected carefully using what is called the Lipschitz constant $L$ ([you can learn more about Lipschitz continuity here](https://www.youtube.com/watch?v=UjvFFXakMks&t=418s)), that after $T$ iterations the following will hold.
 
@@ -201,7 +202,7 @@ Stochastic methods are common in many areas of computational mathematics and are
 
 The core concept of stochastic gradient descent is straightforward -- rather than performing a full gradient calculation at each timestep of gradient descent, we can sample individual gradients $\nabla f_i$'s (where $i$ is selected uniformly at random from $1,...n$) in lieu of computing the full gradient $\nabla f$. We use a randomly sampled $\nabla f_i$ at each step as a general approximation for the full gradient $\nabla f$ in the descent algorithm to step toward the solution at significantly reduced computational cost, with the concession that the step is an approximation. 
 
-IMAGE OF MATRIX OF FULL GRADIENT, VS. A SINGLE HIGHLIGHTED ROW 
+*See [Appendix](#stochastic-gradient-calculation) for more details on stochastic gradient calculation*.
 
 So, we would like to show that this randomly sampled gradient is a valid estimator of the true gradient.
 
@@ -374,7 +375,7 @@ $$
 \end{aligned}
 $$
 
-IMAGE OF RANDOM SAMPLE MATRIX HIGHLIGHT THING
+*See [Appendix](#batch-gradient-calculation) for example calculation details*
 
 We first take the conditional expectation modified from SGD. Note, as with SGD the gradient estimate is unbiased $E[\frac{1}{b} \underset{i \in I_k}{\sum} \nabla f_{i_{k}}(\boldsymbol{\theta}_{k})] = \nabla f(\boldsymbol{\theta}_{k})$.
 
@@ -581,7 +582,7 @@ SAGA's modified algorithm makes the iterations unbiased, however by doing so we 
 
 ### Other Common Variance Reduction Techniques
 
-We have covered some basics of stochastic gradient descent algortihms, as well as some basic approaches to variance reduction, but I also wanted to include some supplemental material for further reading on the basics of the topics. If you are interested in learning more about some common techniques, I recommend [this paper on variance reduction techniques in machine learning](https://arxiv.org/abs/2010.00892).
+We have covered some basics of stochastic gradient descent algortihms, as well as some basic approaches to variance reduction, but I also wanted to include some supplemental material for further reading on the basics of the topics. If you are interested in learning more about some common techniques, I recommend [this paper on variance reduction techniques in machine learning](https://arxiv.org/abs/2010.00892) [@gower2020variancereducedmethodsmachinelearning].
 
 ## SARAH
 
@@ -591,7 +592,7 @@ SARAH, or StochAstic Recursive grAdient algoritHm, is a stochastic gradient desc
 
 To understand the SARAH algorithm, we need to first conceptually understand SVRG.  First, we present the SVRG algorithm.
 
-<div className="-mx-2 flex flex-wrap overflow-hidden xl:-mx-2">
+<div className="-mx-2 flex flex-wrap justify-center overflow-hidden xl:-mx-2">
 ![SVRG algorithm](/static/files/ml_optimization/images/svrg_alg.png#center)
 </div>
 
@@ -674,7 +675,7 @@ Methodology in this section is drawn from *SARAH: A Novel Method for Machine Lea
 
 ([Nguyen, Liu, Scheinberg, and Takáč, 2017](https://arxiv.org/abs/1703.00102))
 
-<div className="-mx-2 flex flex-wrap overflow-hidden xl:-mx-2">
+<div className="-mx-2 flex flex-wrap justify-center overflow-hidden xl:-mx-2">
 ![SARAH algorithm](/static/files/ml_optimization/images/sarah_alg.png#center)
 </div>
 
@@ -768,7 +769,7 @@ So, there are some advantages to SARAH over SVRG, but not necessarily overwhelmi
 #### SARAH+ Algorithm
 
 
-<div className="-mx-2 flex flex-wrap overflow-hidden xl:-mx-2">
+<div className="-mx-2 flex flex-wrap justify-center overflow-hidden xl:-mx-2">
 ![SARAH+ algorithm](/static/files/ml_optimization/images/sarah+_alg.png#center)
 </div>
 
@@ -791,7 +792,7 @@ The ADAM optimizer is a stochastic/batch gradient descent variant that utilizes 
 
 ### The Algorithm
 
-<div className="-mx-2 flex flex-wrap overflow-hidden xl:-mx-2">
+<div className="-mx-2 flex flex-wrap justify-center overflow-hidden xl:-mx-2">
 ![ADAM algorithm](/static/files/ml_optimization/images/adam_alg.png#center)
 </div>
 
@@ -825,7 +826,7 @@ $$
 
 If these recent gradients are similar, the algorithm gets an additional "boost", or "momentum". $\theta_{k-1}$ and so on can be expanded similarly, and we get higher order $\beta$ terms as the algorithm iterates. This favors the most recent gradients since $\beta \in [0,1)$ and higher order terms quickly dampen out previous iterates.
 
-<div className="-mx-2 flex flex-wrap overflow-hidden xl:-mx-2">
+<div className="-mx-2 flex flex-wrap justify-center overflow-hidden xl:-mx-2">
 ![Momentum](/static/files/ml_optimization/images/momentumexampleplot.jpg#center)
 </div>
 
@@ -1003,11 +1004,210 @@ Comparing SARAH and SVRG, we run the inner loop for half an epoch  in Exp. A and
 Supplemental information.
 
 ### Gradient Calculation
+For simplicity, we are using the least squares loss objective function $f$.
+
+$$
+\begin{aligned}
+    f(\boldsymbol{\theta}) = ||A\boldsymbol{\theta}-\boldsymbol{b}||^{2}
+\end{aligned}
+$$
+
+Recall that our data has $p$ features and $n$ total samples, so our matrix $A$ has dimensions $n \times p$. Our labels $b$ (the "response" vector) have a corresponding sample for each data sample, so its dimensions are $n \times 1$. Lastly, our parameters vector has a parameter for each of the $p$ features, so its dimensions are $p \times 1$.
+
+#### Full gradient calculation
+$$
+\begin{aligned}
+\nabla f\left(\boldsymbol{\theta}\right)=\begin{bmatrix}
+    a_{1,1} & a_{1,2} & ... & a_{1,p-1} & a_{1,p}\\
+    a_{2,1} & a_{2,2} & ... & a_{2,p-1} & a_{2,p}\\
+    ... & ... & ... & ... & ...\\
+    a_{n,1} & a_{n,2} & ... & a_{n,p-1} & a_{n,p}
+\end{bmatrix}^{T}
+\left(\begin{bmatrix}
+    a_{1,1} & a_{1,2} & ... & a_{1,p-1} & a_{1,p}\\
+    a_{2,1} & a_{2,2} & ... & a_{2,p-1} & a_{2,p}\\
+    ... & ... & ... & ... & ...\\
+    a_{n,1} & a_{n,2} & ... & a_{n,p-1} & a_{n,p}
+\end{bmatrix}
+\begin{bmatrix}
+    \theta_{1}\\
+    \theta_{2}\\
+    ...\\
+    \theta_{p}
+    \end{bmatrix}-\begin{bmatrix}b_{1}\\
+    b_{2}\\
+    ...\\   
+    b_{n}
+\end{bmatrix}\right)=\begin{bmatrix}
+    \nabla_{full}f\left(\boldsymbol{\theta}\right)_{1}\\
+    \nabla_{full}f\left(\boldsymbol{\theta}\right)_{2}\\
+    ...\\
+    \nabla_{full}f\left(\boldsymbol{\theta}\right)_{p}
+\end{bmatrix}
+\end{aligned}
+$$
+
+*Return to*
++ [Limitations of Regular Gradient Descent](#limitations-of-regular-gradient-descent)
+
+#### Stochastic gradient calculation
+Select a random index $i$ from $\{ 1,...n \}$.
+$$
+\begin{aligned}
+\nabla f\left(\boldsymbol{\theta}\right)=\begin{bmatrix}
+    a_{1,1} & a_{1,2} & ... & a_{1,p-1} & a_{1,p}\\
+    ... & ... & ... & ... & ...\\
+    \color{green}a_{i,1} & \color{green}a_{i,2} & \color{green}... & \color{green}a_{i,p-1} & \color{green}a_{i,p}\\
+    ... & ... & ... & ... & ...\\
+    a_{n,1} & a_{n,2} & ... & a_{n,p-1} & a_{n,p}
+\end{bmatrix}^{T}
+\left(\begin{bmatrix}
+    a_{1,1} & a_{1,2} & ... & a_{1,p-1} & a_{1,p}\\
+    ... & ... & ... & ... & ...\\
+    \color{green}a_{i,1} & \color{green}a_{i,2} & \color{green}... & \color{green}a_{i,p-1} & \color{green}a_{i,p}\\
+    ... & ... & ... & ... & ...\\
+    a_{n,1} & a_{n,2} & ... & a_{n,p-1} & a_{n,p}
+\end{bmatrix}
+\begin{bmatrix}
+    \theta_{1}\\
+    ...\\
+    \color{green}\theta_{i}\\
+    ...\\
+    \theta_{p}
+\end{bmatrix}-\begin{bmatrix}
+    b_{1}\\
+    ...\\
+    \color{green}b_{i}\\
+    ...\\
+    b_{n}
+\end{bmatrix}\right)
+\end{aligned}
+$$
+
+Compute the stochastic gradient (approximation of full gradient).
+
+$$
+\begin{aligned}
+\nabla f_{i}\left(\boldsymbol{\theta}\right)=\begin{bmatrix}
+    a_{i,1} & a_{i,2} & ... & a_{i,p-1} & a_{i,p}
+\end{bmatrix}^{T}
+\left(\begin{bmatrix}
+    a_{1,1} & a_{1,2} & ... & a_{1,p-1} & a_{1,p}
+\end{bmatrix}
+\begin{bmatrix}
+    \theta_{1}\\
+    \theta_{2}\\
+    ...\\
+    \theta_{p}
+\end{bmatrix}-\begin{bmatrix}
+    b_{i}
+\end{bmatrix}\right)=\begin{bmatrix}
+    \nabla_{stochastic}f_{i}\left(\boldsymbol{\theta}\right)_{1}\\
+    \nabla_{stochastic}f_{i}\left(\boldsymbol{\theta}\right)_{2}\\
+    ...\\
+    \nabla_{stochastic}f_{i}\left(\boldsymbol{\theta}\right)_{p}
+\end{bmatrix}
+\end{aligned}
+$$
+
+*Return to*
++ [Limitations of Regular Gradient Descent](#limitations-of-regular-gradient-descent)
++ [Stochastic Gradient Descent](#stochastic-gradient-descent)
+
+#### Batch gradient calculation
+
+We first select a subset of indices $I_k \subset \{ 1,...,n \}$ where $|I_k|=b < < n$. In this example we select $i$, $j$, $k$.
+
+$$
+\begin{aligned}
+\nabla f\left(\boldsymbol{\theta}\right)=\begin{bmatrix}
+    a_{1,1} & a_{1,2} & ... & a_{1,p-1} & a_{1,p}\\
+    ... & ... & ... & ... & ...\\
+    \color{green}a_{i,1} & \color{green}a_{i,2} & \color{green}... & \color{green}a_{i,p-1} & \color{green}a_{i,p}\\
+    ... & ... & ... & ... & ...\\
+    \color{green}a_{j,1} & \color{green}a_{j,2} & \color{green}... & \color{green}a_{j,p-1} & \color{green}a_{j,p}\\
+    ... & ... & ... & ... & ...\\
+    \color{green}a_{k,1} & \color{green}a_{k,2} & \color{green}... & \color{green}a_{k,p-1} & \color{green}a_{k,p}\\
+    ... & ... & ... & ... & ...\\
+    a_{n,1} & a_{n,2} & ... & a_{n,p-1} & a_{n,p}
+\end{bmatrix}^{T}
+\left(\begin{bmatrix}
+    a_{1,1} & a_{1,2} & ... & a_{1,p-1} & a_{1,p}\\
+    ... & ... & ... & ... & ...\\
+    \color{green}a_{i,1} & \color{green}a_{i,2} & \color{green}... & \color{green}a_{i,p-1} & \color{green}a_{i,p}\\
+    ... & ... & ... & ... & ...\\
+    \color{green}a_{j,1} & \color{green}a_{j,2} & \color{green}... & \color{green}a_{j,p-1} & \color{green}a_{j,p}\\
+    ... & ... & ... & ... & ...\\
+    \color{green}a_{k,1} & \color{green}a_{k,2} & \color{green}... & \color{green}a_{k,p-1} & \color{green}a_{k,p}\\
+    ... & ... & ... & ... & ...\\
+    a_{n,1} & a_{n,2} & ... & a_{n,p-1} & a_{n,p}
+\end{bmatrix}
+\begin{bmatrix}
+    \theta_{1}\\
+    ...\\
+    \color{green}\theta_{i}\\
+    ...\\
+    \color{green}\theta_{j}\\
+    ...\\
+    \color{green}\theta_{k}\\
+    ...\\
+    \theta_{p}
+\end{bmatrix}-\begin{bmatrix}
+    b_{1}\\
+    ...\\
+    \color{green}b_{i}\\
+    ...\\
+    \color{green}b_{j}\\
+    ...\\
+    \color{green}b_{k}\\
+    ...\\
+    b_{n}
+\end{bmatrix}\right)
+\end{aligned}
+$$
+
+We compute the batch gradient.
+
+$$
+\begin{aligned}
+\nabla f_{batch}\left(\boldsymbol{\theta}\right)=\begin{bmatrix}
+    a_{i,1} & a_{i,2} & ... & a_{i,p-1} & a_{i,p} \\
+    a_{j,1} & a_{j,2} & ... & a_{j,p-1} & a_{j,p} \\
+    a_{k,1} & a_{k,2} & ... & a_{k,p-1} & a_{k,p}
+\end{bmatrix}^{T}
+\left(\begin{bmatrix}
+    a_{i,1} & a_{i,2} & ... & a_{i,p-1} & a_{i,p} \\
+    a_{j,1} & a_{j,2} & ... & a_{j,p-1} & a_{j,p} \\
+    a_{k,1} & a_{k,2} & ... & a_{k,p-1} & a_{k,p}
+\end{bmatrix}
+\begin{bmatrix}
+    \theta_{1}\\
+    \theta_{2}\\
+    ...\\
+    \theta_{p}
+\end{bmatrix}-\begin{bmatrix}
+    b_{i} \\
+    b_{j} \\
+    b_{k}
+\end{bmatrix}\right)=\begin{bmatrix}
+    \nabla_{avg}f_{batch}\left(\boldsymbol{\theta}\right)_{1}\\
+    \nabla_{avg}f_{batch}\left(\boldsymbol{\theta}\right)_{2}\\
+    ...\\
+    \nabla_{avg}f_{batch}\left(\boldsymbol{\theta}\right)_{p}
+\end{bmatrix}
+\end{aligned}
+$$
+
+Which results in the average of the selected gradients.
+
+*Return to*
++ [Minibatch SGD](#minibatch-sgd)
 
 ### Convexity
+DEFINITIONS OF CONVEX FUNCTIONS
 
 ### Consistency
 
 Informally, a *consistent* estimator just means that if we use more data to estimate a parameter, it is guaranteed to converge to the true value of the parameter.
-DEFINITIONS OF CONVEX FUNCTIONS
+
 

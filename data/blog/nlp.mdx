@@ -76,7 +76,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 
 The `analysis.py` file was used to generate some initial insights into the data. Before we tackle anything, it's always a good idea to *look at the data*.  The first insight that was of interest was the composition of the training data. We want to be certain that there is balance with our training data's samples, i.e. that there is not too many sample of any one particular class of review (positive, negative, or not a review). As it turns out, we do in fact have a rather stark imbalance with our training data.
 
-<div className="-mx-2 flex flex-wrap overflow-hidden xl:-mx-2">
+<div className="-mx-2 flex flex-wrap justify-center overflow-hidden xl:-mx-2">
 ![training data histogram](/static/files/nlp/images/train_hist.png#center)
 </div>
 
@@ -125,7 +125,7 @@ Instead, I hopped on Kaggle and managed to find just what I was looking for, [an
 
 In the `analysis.py` file, I imported the dataset, and created pandas dataframes of only the "positive" reviews and only the "negative" reviews. Then, I calculated the delta in samples of "positive" reviews to "not a review", and the same for "negative". Using those counts, I generated new dataframes for "positive" and "negative" reviews using randomly selected reviews in their respective quantities (using the `np.random.permutation` function), and combined them into one dataframe to write to a new CSV using `to_csv()` with `index=True` to generate IDs for them (note, I did confirm these IDs would be unique from the training IDs). After this, I reimported this data and appended it with the original training data. The resulting training dataset, also in the [repo](https://github.com/uazhlt-ms-program/ling-539-class-competition-code-alexsalce/tree/main/data) as `train_addIMDB.csv`.  After this process, we now have balanced data:
 
-<div className="-mx-2 flex flex-wrap overflow-hidden xl:-mx-2">
+<div className="-mx-2 flex flex-wrap justify-center overflow-hidden xl:-mx-2">
 ![training data histogram](/static/files/nlp/images/train_addIMDB_hist.png#center)
 </div>
 
@@ -145,7 +145,7 @@ The `.fit()` method is executed after the texts are input into a class instance.
 
 On my first attempt, fitting features to the provided training set, it took approximately three minutes to fit the features.
 
-<div className="-mx-2 flex flex-wrap overflow-hidden xl:-mx-2">
+<div className="-mx-2 flex flex-wrap justify-center overflow-hidden xl:-mx-2">
 ![fitfeaturestime](/static/files/nlp/images/fitfeaturestime1.png#center)
 </div>
 
@@ -169,7 +169,7 @@ By default, the `LogisticRegression` `sklearn` class sets its `multi_class` para
 
 Here's where I got a nice wake-up call. Running the classifier with the *original* training data took 🚨**48 MINUTES**🚨 to train. 
 
-<div className="-mx-2 flex flex-wrap overflow-hidden xl:-mx-2">
+<div className="-mx-2 flex flex-wrap justify-center overflow-hidden xl:-mx-2">
 ![original training data classifier training time](/static/files/nlp/images/trainclassifier1.png#center)
 </div>
 
@@ -180,13 +180,13 @@ With the **NEW** training dataset, the training time jumped to 🚨🚨**114 MIN
 
 Once my classifier had finally been trained with the training data, I was able to run my test data through the model and generate predictions.  Running the predictions with the classifier trained to the original data only took about 30 seconds, 
 
-<div className="-mx-2 flex flex-wrap overflow-hidden xl:-mx-2">
+<div className="-mx-2 flex flex-wrap justify-center overflow-hidden xl:-mx-2">
 ![original predictions time](/static/files/nlp/images/predictionstime1.png#center)
 </div>
 
 however when we trained with additional data we picked up more features, which doubled our time making predictions to about 60 seconds.
 
-<div className="-mx-2 flex flex-wrap overflow-hidden xl:-mx-2">
+<div className="-mx-2 flex flex-wrap justify-center overflow-hidden xl:-mx-2">
 ![final classifier times](/static/files/nlp/images/final_classifier_env.png#center)
 </div>
 
@@ -234,7 +234,7 @@ From your local clone, open the `blockbusta_classification_SALCE.py` file (note,
 
 If you would like to run the original training dataset, uncomment `line 57` and comment out `line 58` before you run the script.
 
-<div className="-mx-2 flex flex-wrap overflow-hidden xl:-mx-2">
+<div className="-mx-2 flex flex-wrap justify-center overflow-hidden xl:-mx-2">
 ![final classifier times](/static/files/nlp/images/originaltrainingsetting.png#center)
 </div>
 
