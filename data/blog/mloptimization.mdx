@@ -327,7 +327,10 @@ Model complexity bias-variance tradeoffs can affect the error in *predictions* b
 
 The issue with this variance in general ends up being the rate at which we converge, or whether we converge at all. Variance that overwhelms the steps, it can adversely impact the rate at which we converge to an acceptable solution, and if our algorithm takes too long to execute, we have defeated the purpose of using stochastic methods. In all, our goal becomes finding a balance of the computational advantages of stochastic processes while keeping variance (and as we will see, bias) under control in order to reap the advantages of faster algorithms.
 
-OVERFITTING AND ERROR IMAGE
+<div className="-mx-2 flex flex-wrap justify-center overflow-hidden xl:-mx-2">
+![Bias-Variance tradeoff](/static/files/ml_optimization/images/biasvariance.png)
+</div>
+*NOTE: image from @Hastie2004 p.38, a general illustration of the bias-variance tradeoff*
 
 ### MSE, Variance and Bias
 
@@ -757,8 +760,6 @@ $$
 \end{aligned}
 $$
 
-SHOW IMAGE COMPARISON OF SVRG VS SARAH, MAYBE JUST PIC FROM PAPER? FINDME
-
 The variance reduction of the inner loops is at the expense of bias; SARAH reduces variance in the inner loops but now has bias that is itself stochastic. This bias can be somewhat "corrected" for, however, by executing an outer loop to reinitialize the parameters by pointing them in the correct direction. We will examine some intelligent ways to execute outer loops when necessary using [SARAH+](#sarah%2B-algorithm).
 
 #### SARAH Convergence
@@ -782,7 +783,16 @@ $$
 
 Recall from [above](#sarah-variance-reduction) that the variance bound for SARAH in the strongly convex case is smaller than that of SVRG. So, while their convergence complexity is the same for strong convexity, SARAH can use a larger learning rate than SVRG. SVRG must use a learning rate of $\eta < \frac{1}{4L}$ whereas SARAH can use $\eta < \frac{1}{L}$.
 
-So, there are some advantages to SARAH over SVRG, but not necessarily overwhelmingly so.
+<div className="-mx-2 flex flex-wrap overflow-hidden xl:-mx-2">
+  <div className="my-1 w-full overflow-hidden px-2 xl:my-1 xl:w-1/2 xl:px-2">
+    ![SARAH and SVRG zoomed](/static/files/ml_optimization/images/sarahsvrgzoom.png)
+  </div>
+  <div className="my-1 w-full overflow-hidden px-2 xl:my-1 xl:w-1/2 xl:px-2">
+    ![SARAH and SVRG run same inner and outer loops](/static/files/ml_optimization/images/sarahsvrg.png)
+  </div>
+</div>
+
+We revisit a side by side comparison of SARAH and SVRG, both run with the same number of inner and outer loops with the same hyperparameter settings. The first image is zoomed in to highlight how each algorithm handles variance reduction. SARAH has very little variance, but requires outer loop executions to correct for its inner loop bias (outer loops happen at the "kinks"). SVRG starts moving toward the solution sooner, but has higher variance in its steps until we execute more outer loops, and it smooths as more outer loops are executed (our gradient estimate becomes better).  In the same number of iterations, however, they are fairly comparable.  This is only a very simple example to illustrate their general behaviors, but reinforces that they are very similar algorithms in nature and performance.  So, there are some advantages to SARAH over SVRG, but not necessarily overwhelmingly so.
 
 #### SARAH+ Algorithm
 
@@ -967,7 +977,7 @@ We can approximately correct for bias in each term by assuming initialization of
 
 #### ADAM Convergence
 
-ADAM requires only a basic convexity assumption of the objective function, and a similar but more relaxed assumption of Lipschitz continuity called $(L_0,L_1)$ smoothness ([Wang et al, 2022](https://arxiv.org/abs/2208.09900)). Foregoing the details, ADAM converges at a rate of $\mathcal{O}(\frac{1}{\sqrt{T}})$ (the detailed proof for ADAM's convergence can be found in [the original Kingma and Ba paper](https://arxiv.org/abs/1412.6980)).
+ADAM requires only a basic convexity assumption of the objective function, and a similar but more relaxed assumption of Lipschitz continuity called $(L_0,L_1)$ smoothness [@wangprovable] ([link](https://arxiv.org/abs/2208.09900)). Foregoing the details, ADAM converges at a rate of $\mathcal{O}(\frac{1}{\sqrt{T}})$ (the detailed proof for ADAM's convergence can be found in [original paper](https://arxiv.org/abs/1412.6980)).
 
 Recall that this is the same theoretical convergence rate as SGD, however it is able to used a fixed learning rate rather than a diminishing step size. While its rate is less desirable than other algorithms we have seen, it is still a widely desirable algorithm for it's performance in practice.
 
@@ -975,7 +985,7 @@ Recall that this is the same theoretical convergence rate as SGD, however it is 
 
 ADAM is a very widely used optimizer, particularly for neural network, deep learning, and natural language processing applications amongst others. One of its advantages is how well it handles sparse data, which are commonly characteristic of the data for these types of tasks. While it is not the fastest method in terms of convergence, the methodologies it utilizes to balance stochasic variance while also addressing inherent estimator bias, making this method a trustworthy workhorse.
 
-There is existing infrastructure for ADAM among some common machine learning tools like [Keras](https://keras.io/api/optimizers/adam/), [scikit-learn](https://scikit-learn.org/stable/modules/generated/sklearn.neural_network.MLPClassifier.html), [PyTorch](https://pytorch.org/docs/stable/generated/torch.optim.Adam.html), and [TensorFlow](https://www.tensorflow.org/api_docs/python/tf/keras/optimizers/Adam), to name some prolific packages in industry and research applications, so it has been embraced by the community as an effective optimizer. Overall it is a robust optimizer with reliable performance for convex ([as well as nonconvex](https://arxiv.org/abs/2307.11782)) objectives.
+There is existing infrastructure for ADAM among some common machine learning tools like [Keras](https://keras.io/api/optimizers/adam/), [scikit-learn](https://scikit-learn.org/stable/modules/generated/sklearn.neural_network.MLPClassifier.html), [PyTorch](https://pytorch.org/docs/stable/generated/torch.optim.Adam.html), and [TensorFlow](https://www.tensorflow.org/api_docs/python/tf/keras/optimizers/Adam), to name some prolific packages in industry and research applications, so it has been embraced by the community as an effective optimizer. Overall it is a robust optimizer with reliable performance for convex ([as well as nonconvex](https://arxiv.org/abs/2307.11782), @heconvergence) objectives.
 
 
 ## Example Numerical Experiments
