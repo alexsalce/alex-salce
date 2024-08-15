@@ -419,7 +419,7 @@ The tradeoff here, though, is a more expensive gradient computation by a factor 
   </div>
 </div>
 
-The [ADAM](#adam) optimizer, which we will see in greater detail later, utilizes batch gradients. The above graphs demonstrate the effects of variance reduction for increasing batch sizes. The first plot uses a batch size of $b=100$, the second $b=10$, and the last $b=2$. Clearly, we get closest to our optimal solution using bigger batches to reduce variance in the steps, but what this does not capture is additional computational cost for each step. Ultimately, we tune parameters like batch size to find a balance between performance and results.
+The [ADAM](#adam) optimizer, which we will see in greater detail later, utilizes batch gradients. We are fitting to data of $n=100$ samples with two features $\theta_1$ and $\theta_2$. The above graphs demonstrate the effects of variance reduction for increasing batch sizes. The first plot uses a batch size of $b=100$ (which is essentially regular gradient descent with ADAM's boost), the second $b=10$, and the last $b=2$. Clearly, we get closest to our optimal solution using bigger batches to reduce variance in the steps, but what this does not capture is additional computational cost for each step. Ultimately, we tune parameters like batch size to find a balance between performance and results.
 
 ### Stochastic Average Gradient (SAG) and SAGA
 
