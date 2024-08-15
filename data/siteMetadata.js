@@ -3,7 +3,7 @@ const siteMetadata = {
   title: 'Engineering, Statistics and Data Science',
   author: 'Alex V. Salce',
   headerTitle: 'Alex Salce',
-  description: 'Blog posts and projects',
+  description: 'Latest site updates including blog posts, CV, and projects',
   language: 'en-us',
   theme: 'system', // system, dark or light
   siteUrl: 'https://tailwind-nextjs-starter-blog.vercel.app',
