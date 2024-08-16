@@ -9,11 +9,13 @@ summary: Natural Language Processing Sentiment Classification, Movie Reviews
 ---
 
 ## Task Summary
-This post goes through a basic sentiment classifier that I produced for a natural language processing project. It can be applied to any movie reviews that are conducive to the format outlined below.
+This post goes through a basic sentiment classifier that I produced for a natural language processing project. It can be applied to any movie reviews that are conducive to the format outlined below. 
+
+*Please note that since this is an active course that only high level concepts will be covered and no links to scripts will be provided. My hope is that I will be present when going over this post with you, and can explain any ambiguity in details.*
 
 ## Approach
 
-In building this classifer, I wanted to start with using the same TF-IDF scores for my word vectorizer, settings for my logistic regression classifier that I had produced in the past. That approach produced a high F1 score, so why not try the same thing, right?  Our previous classifier was also performing seniment analysis here so the same principles should apply.
+In building this classifer, I used the same TF-IDF scores for my word vectorizer, settings for my logistic regression classifier that I had produced in a previous effort that did well with sentiment classification. That approach produced a high F1 score, so it was a good starting point for the task of building a new sentiment classifier; our previous classifier was also performing seniment analysis here so the same principles should apply.
 
 ### Dependencies
 
@@ -68,6 +70,8 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 
 ### Exploratory Data Analysis
 
+*Note: the data used for this blog will be unavailable, so we can't recreate any of the specific analysis, but there is a similar data available on Kaggle (see [IMDB dataset](https://www.kaggle.com/datasets/lakshmi25npathi/imdb-dataset-of-50k-movie-reviews))*
+
 The `analysis.py` file was used to generate some initial insights into the data. Before we tackle anything, it's always a good idea to *look at the data*.  The first insight that was of interest was the composition of the training data. We want to be certain that there is balance with our training data's samples, i.e. that there is not too many sample of any one particular class of review (positive, negative, or not a review). As it turns out, we do in fact have a rather stark imbalance with our training data.
 
 <div className="-mx-2 flex flex-wrap justify-center overflow-hidden xl:-mx-2">
@@ -102,7 +106,7 @@ Lastly, looking through some of the individual training and test samples by hand
 
 #### Building input data
 
-We had built classes and methods that preprocessed input data and output lists with elements of the form of tuples with label/document pairs, which is the same format for the data for this task.  The only difference for this task is that we are now dealing with three different types of labels, i.e. three classes and thus a multiclass classification problem instead of a binary classifier.  In the `blockbusta_classification_SALCE.py` script (availabe in my repo under the [code](#link-to-code-repo) link below), I repurposed the read_smsspam() method to preprocess this data and is currently a function called read_file.
+We were able to reuse some classes that preprocessed input data and output lists with elements of the form of tuples with label/document pairs, which is the same format for the data for this task.  The only difference for this task is that we are now dealing with three different types of labels, i.e. three classes and thus a multiclass classification problem instead of a binary classifier.  In the `blockbusta_classification_SALCE.py` script (availabe in my repo under the [code](#link-to-code-repo) link below), I repurposed the read_smsspam() method to preprocess this data and is currently a function called read_file.
 
 The `read_file()` function was repurposed from a previos effort. I wanted it to be able to correctly process both the training and test data, which meant that I would need some "dynamic" features in the function to account for the training data having three columns `['ID', 'TEXT', 'LABEL']` and the test data having two `['ID', 'TEXT']`.  I would also need to store the array of IDs for the test data so that I could rejoin them with the outputs in the end.  For this function, I used Pandas and Numpy...which was not ideal but I am used to working with Pandas dataframes. The function then returns text and ID tuples in an iterable object like before, but if it is test data the iterable also includes labels.
 
@@ -237,4 +241,4 @@ If you would like to peruse the other files, feel free to explore `analysis.py` 
 
 ## Link to Code Repo
 
-*Link will be updated*
+*Note, at this time no code can be provided*
