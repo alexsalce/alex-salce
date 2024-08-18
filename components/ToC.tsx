@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useRef, type MouseEvent } from 'react'
-import type { TOC } from '@/types/server'
+// import type { TOC } from '@/types/server'
 
 export function ToC({ toc }: { toc: TOC[] }) {
   const modifiedToc = toc.map((item) => {
