@@ -13,10 +13,11 @@ const siteMetadata = {
   // mastodon: 'https://mastodon.social/@mastodonuser',
   email: 'avsalce@gmail.com',
   github: 'https://github.com/alexsalce',
+  bluesky: 'https://bsky.app/profile/alexsalce.bsky.social',
   // x: 'https://twitter.com/x',
   // twitter: 'https://twitter.com/Twitter',
   // facebook: 'https://facebook.com',
-  youtube: 'https://youtube.com',
+  // youtube: 'https://youtube.com',
   linkedin: 'https://www.linkedin.com/in/alexsalce',
   // threads: 'https://www.threads.net',
   // instagram: 'https://www.instagram.com',
@@ -34,7 +35,7 @@ const siteMetadata = {
     },
     // plausibleAnalytics: {
     //   plausibleDataDomain: '', // e.g. tailwind-nextjs-starter-blog.vercel.app
-         // If you are hosting your own Plausible.
+    // If you are hosting your own Plausible.
     //   src: '', // e.g. https://plausible.my-domain.com/js/script.js
     // },
     // simpleAnalytics: {},
