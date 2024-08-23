@@ -61,6 +61,7 @@
     "tailwindcss": "^3.4.3",
     "tailwindcss-animate": "^1.0.7",
     "three": "^0.167.1",
+    "tocbot": "^4.29.0",
     "unist-util-visit": "^5.0.0"
   },
   "devDependencies": {

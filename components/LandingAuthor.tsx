@@ -40,7 +40,7 @@ const LandingAuthor = () => {
 
             <p className="leading-[1.8] opacity-70">
               Welcome to my online portfolo! I keep all of my latest projects, CV, and blog posts
-              here. here. Happy to have you!
+              here. Happy to have you!
             </p>
             {/* <p>
               <Link
