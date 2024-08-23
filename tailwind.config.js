@@ -89,7 +89,7 @@ module.exports = {
               '&:hover': {
                 filter: 'brightness(1.10)',
               },
-              code: { color: theme('colors.primary.DEFAULT') },
+              code: { color: theme('colors.primary.400') },
             },
             p: {
               fontSize: '16px',
@@ -105,15 +105,15 @@ module.exports = {
               fontSize: '16px !important',
             },
             code: {
-              color: theme('colors.primary.DEFAULT'),
-              fontSize: 'inherit',
-              fontWeight: '400',
-              backgroundColor: theme('colors.primary.foreground'),
-              borderWidth: '1px',
-              borderColor: theme('colors.border'),
-              fontFamily: 'inherit',
-              borderRadius: '0.25rem',
-              padding: '0.25rem 0.5rem',
+              color: theme('colors.fuchsia.500'),
+              // fontSize: 'inherit',
+              // fontWeight: '400',
+              // backgroundColor: theme('colors.primary.foreground'),
+              // borderWidth: '1px',
+              // borderColor: theme('colors.border'),
+              // fontFamily: 'inherit',
+              // borderRadius: '0.25rem',
+              // padding: '0.25rem 0.5rem',
             },
             'code::before': {
               display: 'none',
@@ -155,7 +155,7 @@ module.exports = {
               '&:hover': {
                 filter: 'brightness(1.10)',
               },
-              code: { color: theme('colors.primary.DEFAULT') },
+              code: { color: theme('colors.primary.400') },
             },
             p: {
               fontSize: '16px',
