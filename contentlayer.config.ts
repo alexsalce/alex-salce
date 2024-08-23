@@ -125,6 +125,23 @@ export const Blog = defineDocumentType(() => ({
   },
 }))
 
+export const Resume = defineDocumentType(() => ({
+  name: 'Resume',
+  filePathPattern: 'resume/**/*.mdx',
+  contentType: 'mdx',
+  fields: {
+    name: { type: 'string', required: true },
+    avatar: { type: 'string' },
+    occupation: { type: 'string' },
+    company: { type: 'string' },
+    email: { type: 'string' },
+    linkedin: { type: 'string' },
+    github: { type: 'string' },
+    layout: { type: 'string' },
+  },
+  computedFields,
+}))
+
 export const Authors = defineDocumentType(() => ({
   name: 'Authors',
   filePathPattern: 'authors/**/*.mdx',
@@ -138,6 +155,7 @@ export const Authors = defineDocumentType(() => ({
     twitter: { type: 'string' },
     linkedin: { type: 'string' },
     github: { type: 'string' },
+    bluesky: { type: 'string' },
     layout: { type: 'string' },
   },
   computedFields,
@@ -145,7 +163,7 @@ export const Authors = defineDocumentType(() => ({
 
 export default makeSource({
   contentDirPath: 'data',
-  documentTypes: [Blog, Authors],
+  documentTypes: [Blog, Authors, Resume],
   mdx: {
     cwd: process.cwd(),
     remarkPlugins: [

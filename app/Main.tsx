@@ -4,15 +4,22 @@ import siteMetadata from '@/data/siteMetadata'
 import { formatDate } from 'pliny/utils/formatDate'
 import NewsletterForm from 'pliny/ui/NewsletterForm'
 
-const MAX_DISPLAY = 5
+// import Hero from 'components/Hero'
+// import ProjectCarousel from '@/components/projCarousel'
+// import { SmoothScrollHero } from '@/components/SmoothScrollHero'
+import LandingAuthor from '@/components/LandingAuthor'
+
+const MAX_DISPLAY = 3
 
 export default function Home({ posts }) {
   return (
     <>
+      <LandingAuthor />
+      {/* <SmoothScrollHero /> */}
       <div className="divide-y divide-gray-200 dark:divide-gray-700">
         <div className="space-y-2 pb-8 pt-6 md:space-y-5">
           <h1 className="text-3xl font-extrabold leading-9 tracking-tight text-gray-900 dark:text-gray-100 sm:text-4xl sm:leading-10 md:text-6xl md:leading-14">
-            Latest
+            Latest Blogs
           </h1>
           <p className="text-lg leading-7 text-gray-500 dark:text-gray-400">
             {siteMetadata.description}
@@ -56,7 +63,7 @@ export default function Home({ posts }) {
                       <div className="text-base font-medium leading-6">
                         <Link
                           href={`/blog/${slug}`}
-                          className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
+                          className="hover:text-primary-600 dark:hover:text-primary-400 text-primary-500"
                           aria-label={`Read more: "${title}"`}
                         >
                           Read more &rarr;
@@ -74,18 +81,18 @@ export default function Home({ posts }) {
         <div className="flex justify-end text-base font-medium leading-6">
           <Link
             href="/blog"
-            className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
+            className="hover:text-primary-600 dark:hover:text-primary-400 text-primary-500"
             aria-label="All posts"
           >
             All Posts &rarr;
           </Link>
         </div>
       )}
-      {siteMetadata.newsletter?.provider && (
+      {/* {siteMetadata.newsletter?.provider && (
         <div className="flex items-center justify-center pt-4">
           <NewsletterForm />
         </div>
-      )}
+      )} */}
     </>
   )
 }
