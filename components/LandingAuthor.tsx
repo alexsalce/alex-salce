@@ -40,7 +40,7 @@ const LandingAuthor = () => {
             </h3>
 
             <p className="text-primary-DEFAULT text-2xl leading-[1.4] opacity-70">
-              Welcome to my online portfolo! I keep all of my latest projects, CV, and blog posts
+              Welcome to my online portfolio! I keep all of my latest projects, CV, and blog posts
               here. Happy to have you!
             </p>
           </div>
