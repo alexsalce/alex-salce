@@ -20,7 +20,7 @@ const LandingAuthor = () => {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1, transition: { staggerChildren: 0.15 } }}
-        transition={{ duration: 0.5, delay: 0.1 }}
+        transition={{ duration: 0.8, delay: 0.2 }}
         whileHover={{ scale: 1.05 }}
       >
         <Craft.Container className="grid items-stretch md:grid-cols-2 md:gap-12">
@@ -30,7 +30,7 @@ const LandingAuthor = () => {
               alt="salce"
               width={192}
               height={192}
-              className="h-48 w-48 rounded-full"
+              className="h-60 w-60 rounded-full"
             />
           </div>
           <div className="flex flex-col gap-6 py-8 font-bold">
@@ -38,28 +38,10 @@ const LandingAuthor = () => {
               Hi, I'm Alex
             </h3>
 
-            <p className="leading-[1.8] opacity-70">
+            <p className="text-primary-DEFAULT text-2xl leading-[1.4] opacity-70">
               Welcome to my online portfolo! I keep all of my latest projects, CV, and blog posts
               here. Happy to have you!
             </p>
-            {/* <p>
-              <Link
-                href={`/projects`}
-                className="hover:text-primary-600 -ml-2 text-sm font-semibold uppercase text-primary-500 dark:text-primary-500"
-                aria-label={`Check out my favorite projects`}
-              >
-                Check out my latest projects
-              </Link>
-            </p>
-            <p>
-              <Link
-                href={`/blog/cv`}
-                className="-ml-2 text-sm font-semibold uppercase text-primary-500 dark:text-primary-500"
-                aria-label={`Check out my CVs`}
-              >
-                Check out my CV
-              </Link>
-            </p> */}
           </div>
         </Craft.Container>
       </motion.div>
