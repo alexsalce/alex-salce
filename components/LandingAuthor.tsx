@@ -19,6 +19,7 @@ const LandingAuthor = () => {
     <Craft.Section>
       <motion.div
         initial={{ opacity: 0 }}
+        whileInView="visible"
         animate={{ opacity: 1, transition: { staggerChildren: 0.15 } }}
         transition={{ duration: 0.8, delay: 0.2 }}
         whileHover={{ scale: 1.05 }}
