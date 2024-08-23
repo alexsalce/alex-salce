@@ -39,8 +39,8 @@ const LandingAuthor = () => {
             </h3>
 
             <p className="leading-[1.8] opacity-70">
-              Welcome to my online portfolo where I keep all of my latest projects in blog form.
-              Happy to have you!
+              Welcome to my online portfolo! I keep all of my latest projects, CV, and blog posts
+              here. here. Happy to have you!
             </p>
             {/* <p>
               <Link

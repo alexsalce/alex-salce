@@ -6,7 +6,7 @@ import NewsletterForm from 'pliny/ui/NewsletterForm'
 
 // import Hero from 'components/Hero'
 // import ProjectCarousel from '@/components/projCarousel'
-import { SmoothScrollHero } from '@/components/SmoothScrollHero'
+// import { SmoothScrollHero } from '@/components/SmoothScrollHero'
 import LandingAuthor from '@/components/LandingAuthor'
 
 const MAX_DISPLAY = 3
