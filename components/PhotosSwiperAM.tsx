@@ -5,6 +5,11 @@ import { Swiper, SwiperSlide } from 'swiper/react'
 
 // Import Swiper styles
 import 'swiper/css'
+import 'swiper/css/free-mode'
+import 'swiper/css/pagination'
+
+// import required modules
+import { FreeMode, Pagination } from 'swiper/modules'
 
 // Import next Image
 import Image from 'next/image'
@@ -53,18 +58,23 @@ const photos = [
 
 const PhotosSwiper = () => {
   return (
-    <Swiper
-      spaceBetween={5}
-      slidesPerView={3}
-      onSlideChange={() => console.log('slide change')}
-      onSwiper={(swiper) => console.log(swiper)}
-    >
-      {photos.map((photo, index) => (
-        <SwiperSlide key={index}>
-          <Image src={photo.src} alt="Photography" width={300} height={300}></Image>
-        </SwiperSlide>
-      ))}
-    </Swiper>
+    <>
+      <Swiper
+        slidesPerView={3}
+        spaceBetween={30}
+        freeMode={true}
+        pagination={{
+          clickable: true,
+        }}
+        modules={[FreeMode, Pagination]}
+      >
+        {photos.map((photo, index) => (
+          <SwiperSlide key={index}>
+            <Image src={photo.src} alt="Photography" width={500} height={300}></Image>
+          </SwiperSlide>
+        ))}
+      </Swiper>
+    </>
   )
 }
 
