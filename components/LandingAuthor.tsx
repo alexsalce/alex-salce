@@ -20,9 +20,14 @@ const LandingAuthor = () => {
       <motion.div
         initial={{ opacity: 0 }}
         whileInView="visible"
-        animate={{ opacity: 1, transition: { staggerChildren: 0.15 } }}
-        transition={{ duration: 0.8, delay: 0.2 }}
+        viewport={{ once: false }}
+        animate={{ opacity: [0, 1], transition: { staggerChildren: 0.15 } }}
+        transition={{ ease: 'easeIn', duration: 0.8, delay: 0.2 }}
         whileHover={{ scale: 1.05 }}
+        variants={{
+          visible: { opacity: 1, scale: 1 },
+          hidden: { opacity: 0, scale: 0 },
+        }}
       >
         <Craft.Container className="grid items-stretch md:grid-cols-2 md:gap-12">
           <div className="flex flex-col items-center space-x-2 pt-8">
