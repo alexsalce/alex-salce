@@ -8,7 +8,7 @@ import 'swiper/css'
 import 'swiper/css/pagination'
 
 // import required modules
-import { Pagination } from 'swiper/modules'
+import { Autoplay, Pagination } from 'swiper/modules'
 
 // Import next Image
 import Image from 'next/image'
@@ -115,10 +115,14 @@ const PhotosSwiperOutdoors = () => {
       <Swiper
         slidesPerView={'auto'}
         spaceBetween={30}
+        autoplay={{
+          delay: 2500,
+          disableOnInteraction: true,
+        }}
         pagination={{
           clickable: true,
         }}
-        modules={[Pagination]}
+        modules={[Autoplay, Pagination]}
         className="mySwiper"
       >
         {photos.map((photo, index) => (
