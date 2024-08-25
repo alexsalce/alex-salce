@@ -30,7 +30,7 @@ const photos = [
     src: '/static/files/aboutme/photography/0101321-R01-033-15.jpg',
   },
   {
-    src: '/static/files/aboutme/photography/s0101321-R01-019-8.JPEG',
+    src: '/static/files/aboutme/photography/0101321-R01-019-8.JPEG',
   },
   {
     src: '/static/files/aboutme/photography/0101321-R01-045-21.jpg',
