@@ -8,7 +8,7 @@ import 'swiper/css'
 import 'swiper/css/effect-cards'
 
 // import required modules
-import { EffectCards } from 'swiper/modules'
+import { Autoplay, EffectCards } from 'swiper/modules'
 
 // Import next Image
 import Image from 'next/image'
@@ -79,7 +79,16 @@ const photos = [
 const PhotosSwiperPhotography = () => {
   return (
     <>
-      <Swiper effect={'cards'} grabCursor={true} modules={[EffectCards]} className="mySwiper">
+      <Swiper
+        effect={'cards'}
+        grabCursor={true}
+        autoplay={{
+          delay: 2500,
+          disableOnInteraction: true,
+        }}
+        modules={[Autoplay, EffectCards]}
+        className="mySwiper"
+      >
         {photos.map((photo, index) => (
           <SwiperSlide key={index}>
             <Image src={photo.src} alt="Photography" width={500} height={300}></Image>
