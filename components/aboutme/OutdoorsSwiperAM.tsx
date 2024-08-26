@@ -35,9 +35,9 @@ const photos = [
   {
     src: '/static/files/aboutme/outdoors/IMG_1873.jpg',
   },
-  {
-    src: '/static/files/aboutme/outdoors/IMG_1893.jpg',
-  },
+  // {
+  //   src: '/static/files/aboutme/outdoors/IMG_1893.jpg',
+  // },
   {
     src: '/static/files/aboutme/outdoors/IMG_1913.jpg',
   },
@@ -47,15 +47,15 @@ const photos = [
   {
     src: '/static/files/aboutme/outdoors/IMG_3213.jpg',
   },
-  {
-    src: '/static/files/aboutme/outdoors/IMG_3225.JPG',
-  },
-  {
-    src: '/static/files/aboutme/outdoors/IMG_3334.JPG',
-  },
-  {
-    src: '/static/files/aboutme/outdoors/IMG_3335.JPG',
-  },
+  // {
+  //   src: '/static/files/aboutme/outdoors/IMG_3225.JPG',
+  // },
+  // {
+  //   src: '/static/files/aboutme/outdoors/IMG_3334.JPG',
+  // },
+  // {
+  //   src: '/static/files/aboutme/outdoors/IMG_3335.JPG',
+  // },
   {
     src: '/static/files/aboutme/outdoors/IMG_3463.PNG',
   },
@@ -77,12 +77,12 @@ const photos = [
   {
     src: '/static/files/aboutme/outdoors/IMG_5619.jpg',
   },
-  {
-    src: '/static/files/aboutme/outdoors/IMG_6714.jpg',
-  },
-  {
-    src: '/static/files/aboutme/outdoors/IMG_6733.jpg',
-  },
+  // {
+  //   src: '/static/files/aboutme/outdoors/IMG_6714.jpg',
+  // },
+  // {
+  //   src: '/static/files/aboutme/outdoors/IMG_6733.jpg',
+  // },
   {
     src: '/static/files/aboutme/outdoors/IMG_6783.jpg',
   },
