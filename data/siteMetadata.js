@@ -2,7 +2,8 @@
 const siteMetadata = {
   title: 'Alex Salce | Portfolio',
   author: 'Alex V. Salce',
-  headerTitle: 'Alex Salce | University of Arizona',
+  headerTitle: 'Alex Salce',
+  footerTitle: 'University of Arizona',
   description: 'Latest site updates including blog posts, CV, and projects',
   language: 'en-us',
   theme: 'system', // system, dark or light
