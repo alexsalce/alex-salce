@@ -1,12 +1,13 @@
 /** @type {import("pliny/config").PlinyConfig } */
 const siteMetadata = {
-  title: 'Engineering, Statistics and Data Science',
+  title: 'Alex Salce | Portfolio',
   author: 'Alex V. Salce',
   headerTitle: 'Alex Salce',
+  footerTitle: 'University of Arizona',
   description: 'Latest site updates including blog posts, CV, and projects',
   language: 'en-us',
   theme: 'system', // system, dark or light
-  siteUrl: 'https://tailwind-nextjs-starter-blog.vercel.app',
+  siteUrl: 'https://www.alexsalce.com',
   siteRepo: 'https://github.com/alexsalce/alex-salce',
   siteLogo: `${process.env.BASE_PATH || ''}/static/images/logo.png`,
   socialBanner: `${process.env.BASE_PATH || ''}/static/images/twitter-card.png`,
