@@ -90,7 +90,8 @@ The gradient descent algorithm is ideal for optimization of this kind of problem
 
 We must note that the least squares objective function $f$ is convex, for which follows that $f$ must have a global minimum (it must reach a "smallest" value). Not all problems in machine learning utilize convex loss functions, but many common applications do in practice. 
 
-**This post will assume, unless otherwise stated, that the objective function $f$ is convex (i.e. we will be covering convex optimization).**
+> [!NOTE]
+> This post will assume, unless otherwise stated, that the objective function $f$ is convex (i.e. we will be covering convex optimization).
 
 Common examples of convex objective functions include logistic regression, data fitting, SVMs, Lasso and Group Lasso. Convexity is detailed more formally in the [appendix](#convexity).
 
@@ -232,7 +233,8 @@ $$
 
 where $i_{k} \in \{1,...,n\}$ is an index chosen uniformly at random for an iteration $k$. 
 
-**Note:** *SGD cannot converge with a fixed step size; instead it must use a diminishing step size that satisfies $\underset{k \rightarrow \infty}{\text{lim }\alpha_{k} = 0}$ and $\overset{\infty}{\underset{k=1}{\sum}}{\alpha_{k}} = \infty$. Hence learning rate is denoted with $\alpha_{k}$.*
+> [!NOTE] 
+> SGD cannot converge with a fixed step size; instead it must use a diminishing step size that satisfies $\underset{k \rightarrow \infty}{\text{lim }\alpha_{k} = 0}$ and $\overset{\infty}{\underset{k=1}{\sum}}{\alpha_{k}} = \infty$. Hence learning rate is denoted with $\alpha_{k}$.
 
 We want to determine whether $\nabla f_{i_{k}}(\boldsymbol{\theta}_{k})$ is a valid estimator for the true gradient $\nabla f(\boldsymbol{\theta}_{k})$, so we are interested in its expectation. Since $i_k$ is selected uniformly at random, the following expectation holds.
 
@@ -330,7 +332,8 @@ The issue with this variance in general ends up being the rate at which we conve
 <div className="-mx-2 flex flex-wrap justify-center overflow-hidden xl:-mx-2">
 ![Bias-Variance tradeoff](/static/files/ml_optimization/images/biasvariance.png)
 </div>
-*NOTE: image from* @Hastie2004 *p.38, a general illustration of the bias-variance tradeoff*
+> [!NOTE] 
+> Image from* @Hastie2004 *p.38, a general illustration of the bias-variance tradeoff*
 
 ### MSE, Variance and Bias
 
@@ -401,7 +404,8 @@ $$
 \end{aligned}
 $$
 
-*Note that the above calculation uses the identity $||\overset{n}{\underset{i=1}{\sum}} a_i||^2 \leq  \overset{n}{\underset{i=1}{\sum}} ||a_i||^2$ to derive inequality.*
+> [!NOTE] 
+> The above calculation uses the identity $||\overset{n}{\underset{i=1}{\sum}} a_i||^2 \leq  \overset{n}{\underset{i=1}{\sum}} ||a_i||^2$ to derive inequality.*
 
 We can reduce the variance bound by a factor of batch size be $b$. Since the estimator is unbiased, we do not need to be concerned with mere displacement of MSE a bias term. Intuitively we can make sense of this since we are using more information for each gradient calculation, and thus we get a better approximation $\nabla f_{i_{k}}(\boldsymbol{\theta}_{k})$ of the gradient $\nabla f(\boldsymbol{\theta}_{k})$ at each step $k$. *Note here also that this result does not require a diminishing learning rate, so it can be applied to gradient descent algorithms with constant or adaptive learning rates.*
 
@@ -824,7 +828,8 @@ The ADAM optimizer is a stochastic/batch gradient descent variant that utilizes 
 ![ADAM algorithm](/static/files/ml_optimization/images/adam_alg.png#center)
 </div>
 
-*Note $g_t^2$ is equivalent to element-wise multiplication of gradients $g_1 \odot g_2$*
+> [!NOTE] 
+> $g_t^2$ is equivalent to element-wise multiplication of gradients $g_1 \odot g_2$
 
 #### Variance Reduction
 
@@ -990,7 +995,8 @@ There is existing infrastructure for ADAM among some common machine learning too
 
 ## Example Numerical Experiments
 
-*This section was lifted directly from my coursework. Note this section uses $x$ for the model parameter vector instead of the $\theta$ we have been using previously (different choices may be seen in practice)*.
+> [!NOTE]
+> This section was lifted directly from my coursework. Note this section uses $x$ for the model parameter vector instead of the $\theta$ we have been using previously (different choices may be seen in practice).
 
 The purpose of the numerical experiment will be to evaluate general performance of ADAM and SARAH on real data and to illustrate a bias-variance tradeoff between SVRG and SARAH.
 We use the "Wine Quality" dataset from the UC Irvine Machine Learning Repository [@winequality]. The data are measurements of wine characteristics (features) used to predict wine quality scores. There are $n=6497$ instances and $m=11$ features. The experiements will use a simple least squares linear regression objective, assuming a system with data $A$ and response $b$ is of the form $Ax=b$.
