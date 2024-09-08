@@ -11,7 +11,8 @@ summary: Natural Language Processing Sentiment Classification, Movie Reviews
 ## Task Summary
 This post goes through a basic sentiment classifier that I produced for a natural language processing project. It can be applied to any movie reviews that are conducive to the format outlined below. 
 
-*Please note that since this is an active course that only high level concepts will be covered and no links to scripts will be provided. My hope is that I will be present when going over this post with you, and can explain any ambiguity in details.*
+> [!NOTE]
+> Please note that since this is an active course that only high level concepts will be covered and no links to scripts will be provided. My hope is that I will be present when going over this post with you, and can explain any ambiguity in details.
 
 ## Approach
 
@@ -70,7 +71,8 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 
 ### Exploratory Data Analysis
 
-*Note: the data used for this blog will be unavailable, so we can't recreate any of the specific analysis, but there is a similar data available on Kaggle (see [IMDB dataset](https://www.kaggle.com/datasets/lakshmi25npathi/imdb-dataset-of-50k-movie-reviews))*
+> [!NOTE]
+> The data used for this blog will be unavailable, so we can't recreate any of the specific analysis, but there is a similar data available on Kaggle (see [IMDB dataset](https://www.kaggle.com/datasets/lakshmi25npathi/imdb-dataset-of-50k-movie-reviews))
 
 The `analysis.py` file was used to generate some initial insights into the data. Before we tackle anything, it's always a good idea to *look at the data*.  The first insight that was of interest was the composition of the training data. We want to be certain that there is balance with our training data's samples, i.e. that there is not too many sample of any one particular class of review (positive, negative, or not a review). As it turns out, we do in fact have a rather stark imbalance with our training data.
 
@@ -241,4 +243,5 @@ If you would like to peruse the other files, feel free to explore `analysis.py` 
 
 ## Link to Code Repo
 
-*Note, at this time no code can be provided*
+> [!NOTE]
+> At this time no code can be provided
