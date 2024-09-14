@@ -1,8 +1,8 @@
 interface Project {
-  title: string,
-  description: string,
-  href?: string,
-  imgSrc?: string,
+  title: string
+  description: string
+  href?: string
+  imgSrc?: string
 }
 
 const projectsData: Project[] = [
@@ -24,12 +24,12 @@ const projectsData: Project[] = [
     imgSrc: '/static/files/doe/ftlink.png',
     href: '/blog/doe',
   },
-  {
-    title: 'Natural Language Processing Sentiment Classifier',
-    description: `Movie review sentiment classification using Python.`,
-    imgSrc: '/static/files/nlp/images/nlp_link.png',
-    href: '/blog/nlp',
-  },
+  // {
+  //   title: 'Natural Language Processing Sentiment Classifier',
+  //   description: `Movie review sentiment classification using Python.`,
+  //   imgSrc: '/static/files/nlp/images/nlp_link.png',
+  //   href: '/blog/nlp',
+  // },
 ]
 
 export default projectsData
