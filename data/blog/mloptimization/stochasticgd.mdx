@@ -6,13 +6,17 @@ layout: PostSimple
 images: ['/static/files/ml_optimization/images/ml_optimizationheader.png']
 draft: false
 summary: A dive into techniques and statistical background in machine learning optimization, with focus upon stochastic gradient descent, variance reduction techniques, and the bias-variance tradeoff.
-# bibliography: /bib/mloptimization.bib
+bibliography: /bib/mloptimization.bib
 ---
 
 > # Table of Contents
+>
 > ## [0: Introduction](/blog/mloptimization)
+>
 > ## [1: Crash Course: Gradient Descent](/blog/mloptimization/gd)
+>
 > ## [3: Variance Reduction Techniques](/blog/mloptimization/variancereduction)
+>
 > ## [4: SARAH and ADAM Algorithms](/blog/mloptimization/sarahadam)
 
 ## [Previous: ML Optimization Splash Page](/blog/mloptimization)
@@ -21,9 +25,9 @@ summary: A dive into techniques and statistical background in machine learning o
 
 Stochastic methods are common in many areas of computational mathematics and are desirable for improving computational performance by leveraging random operations. A stochastic approach to gradient descent is a natural extension; we want to speed up an inherently slow but robust method for training our machine learning models.
 
-The core concept of stochastic gradient descent is straightforward -- rather than performing a full gradient calculation at each timestep of gradient descent, we can sample individual gradients $\nabla f_i$'s (where $i$ is selected uniformly at random from $1,...n$) in lieu of computing the full gradient $\nabla f$. We use a randomly sampled $\nabla f_i$ at each step as a general approximation for the full gradient $\nabla f$ in the descent algorithm to step toward the solution at significantly reduced computational cost, with the concession that the step is an approximation. 
+The core concept of stochastic gradient descent is straightforward -- rather than performing a full gradient calculation at each timestep of gradient descent, we can sample individual gradients $\nabla f_i$'s (where $i$ is selected uniformly at random from $1,...n$) in lieu of computing the full gradient $\nabla f$. We use a randomly sampled $\nabla f_i$ at each step as a general approximation for the full gradient $\nabla f$ in the descent algorithm to step toward the solution at significantly reduced computational cost, with the concession that the step is an approximation.
 
-*See [appendix](/blog/mloptimization#stochastic-gradient-calculation) for more details on stochastic gradient calculation*.
+_See [appendix](/blog/mloptimization#stochastic-gradient-calculation) for more details on stochastic gradient calculation_.
 
 So, we would like to show that this randomly sampled gradient is a valid estimator of the true gradient.
 
@@ -33,7 +37,7 @@ For stochastic descent, we want to consider the following problem, minimizing th
 
 $$
 \begin{aligned}
-    \underset{\boldsymbol{\theta}}{\text{min}f(\boldsymbol{\theta})}\overset{\Delta}{=}\frac{1}{n}\sum_{i=1}^{n}{f_{i}(\boldsymbol{\theta})} 
+    \underset{\boldsymbol{\theta}}{\text{min}f(\boldsymbol{\theta})}\overset{\Delta}{=}\frac{1}{n}\sum_{i=1}^{n}{f_{i}(\boldsymbol{\theta})}
 \end{aligned}
 $$
 
@@ -53,16 +57,16 @@ $$
 \end{aligned}
 $$
 
-where $i_{k} \in \{1,...,n\}$ is an index chosen uniformly at random for an iteration $k$. 
+where $i_{k} \in \{1,...,n\}$ is an index chosen uniformly at random for an iteration $k$.
 
-> [!NOTE] 
+> [!NOTE]
 > SGD cannot converge with a fixed step size; instead it must use a diminishing step size that satisfies $\underset{k \rightarrow \infty}{\text{lim }\alpha_{k} = 0}$ and $\overset{\infty}{\underset{k=1}{\sum}}{\alpha_{k}} = \infty$. Hence learning rate is denoted with $\alpha_{k}$.
 
 We want to determine whether $\nabla f_{i_{k}}(\boldsymbol{\theta}_{k})$ is a valid estimator for the true gradient $\nabla f(\boldsymbol{\theta}_{k})$, so we are interested in its expectation. Since $i_k$ is selected uniformly at random, the following expectation holds.
 
 $$
 \begin{aligned}
-    \mathbb{E}[\nabla f_{i_{k}}(\boldsymbol{\theta}_{k})] = \sum_{i=1}^{n}{P(i=i_{k}) \nabla f_{i_{k}}(\boldsymbol{\theta}_{k})} = \frac{1}{n} \sum_{i=1}^{n}{ \nabla f_{i_{k}}(\boldsymbol{\theta}_{k})} = \nabla f(\boldsymbol{\theta}_{k}) 
+    \mathbb{E}[\nabla f_{i_{k}}(\boldsymbol{\theta}_{k})] = \sum_{i=1}^{n}{P(i=i_{k}) \nabla f_{i_{k}}(\boldsymbol{\theta}_{k})} = \frac{1}{n} \sum_{i=1}^{n}{ \nabla f_{i_{k}}(\boldsymbol{\theta}_{k})} = \nabla f(\boldsymbol{\theta}_{k})
 \end{aligned}
 $$
 
@@ -91,45 +95,45 @@ An analysis of convergence of SGD reveals how we quantify the variance in the al
 
 $$
 \begin{aligned}
-    \boldsymbol{\theta}_{k+1}=\boldsymbol{\theta}_{k}-\alpha_{k} [\nabla f(\boldsymbol{\theta}_{k})-\underset{w_{k}}{\underbrace{(\nabla f(\boldsymbol{\theta}_{k})-\nabla f_{i_{k}}(\boldsymbol{\theta}_{k}))}}] 
+    \boldsymbol{\theta}_{k+1}=\boldsymbol{\theta}_{k}-\alpha_{k} [\nabla f(\boldsymbol{\theta}_{k})-\underset{w_{k}}{\underbrace{(\nabla f(\boldsymbol{\theta}_{k})-\nabla f_{i_{k}}(\boldsymbol{\theta}_{k}))}}]
 \end{aligned}
 $$
 
- We assume $f$ is convex and that $\nabla f$ is Lipschitz continuous.  First, we define $\boldsymbol{w_{k}} \overset{\Delta}{=} \nabla f(\boldsymbol{\theta_{k}}) - \nabla f_{i_{k}}(\boldsymbol{\theta_{k}})$. $\boldsymbol{w_{k}}$ quantifies the error between the full gradient and a stochastic gradient at iteration $k$. 
- 
- Next, we take the conditional expectiation of $\boldsymbol{w_{k}}$ given parameters $\boldsymbol{\theta_{k}}$,
+We assume $f$ is convex and that $\nabla f$ is Lipschitz continuous. First, we define $\boldsymbol{w_{k}} \overset{\Delta}{=} \nabla f(\boldsymbol{\theta_{k}}) - \nabla f_{i_{k}}(\boldsymbol{\theta_{k}})$. $\boldsymbol{w_{k}}$ quantifies the error between the full gradient and a stochastic gradient at iteration $k$.
+
+Next, we take the conditional expectiation of $\boldsymbol{w_{k}}$ given parameters $\boldsymbol{\theta_{k}}$,
 
 $$
 \begin{aligned}
-    \mathbb{E} [\boldsymbol{w_{k}} | \boldsymbol{\theta_{k}}] = \mathbb{E} [ \nabla f(\boldsymbol{\theta_{k}}) - \nabla f_{i_{k}}(\boldsymbol{\theta_{k}}) | \boldsymbol{\theta_{k}}] =  \nabla f(\boldsymbol{\theta_{k}}) - \underset{\nabla f (\boldsymbol \theta_{k})}{\underbrace{\mathbb{E} [\nabla f_{i_{k}}(\boldsymbol{\theta_{k}}) | \boldsymbol{\theta_{k}}]}} = 0  
+    \mathbb{E} [\boldsymbol{w_{k}} | \boldsymbol{\theta_{k}}] = \mathbb{E} [ \nabla f(\boldsymbol{\theta_{k}}) - \nabla f_{i_{k}}(\boldsymbol{\theta_{k}}) | \boldsymbol{\theta_{k}}] =  \nabla f(\boldsymbol{\theta_{k}}) - \underset{\nabla f (\boldsymbol \theta_{k})}{\underbrace{\mathbb{E} [\nabla f_{i_{k}}(\boldsymbol{\theta_{k}}) | \boldsymbol{\theta_{k}}]}} = 0
 \end{aligned}
 $$
 
- We establish $\boldsymbol{w_{k}}$ is conditionally unbiased as an assumption. Now we take the conditional variance and use the conditional unbiasedness assumption for the following.
+We establish $\boldsymbol{w_{k}}$ is conditionally unbiased as an assumption. Now we take the conditional variance and use the conditional unbiasedness assumption for the following.
 
- $$
+$$
 \begin{aligned}
-    \text{Var}(\boldsymbol{w_{k}} | \boldsymbol{\theta_{k}}) = \mathbb{E} [\boldsymbol{w_{k}} \boldsymbol{w_{k}}^T | \boldsymbol{\theta_{k}}] - \underset{=0}{\underbrace{\mathbb{E} [\boldsymbol{w_{k}} | \boldsymbol{\theta_{k}}]^2 }} 
+   \text{Var}(\boldsymbol{w_{k}} | \boldsymbol{\theta_{k}}) = \mathbb{E} [\boldsymbol{w_{k}} \boldsymbol{w_{k}}^T | \boldsymbol{\theta_{k}}] - \underset{=0}{\underbrace{\mathbb{E} [\boldsymbol{w_{k}} | \boldsymbol{\theta_{k}}]^2 }}
 \end{aligned}
 $$
 
- We can now use the [Cauchy-Schwarz Inequality](https://en.wikipedia.org/wiki/Cauchy%E2%80%93Schwarz_inequality) to show
+We can now use the [Cauchy-Schwarz Inequality](https://en.wikipedia.org/wiki/Cauchy%E2%80%93Schwarz_inequality) to show
 
- $$
+$$
 \begin{aligned}
-    || \text{Var}(\boldsymbol{w_{k}} | \boldsymbol{\theta_{k}}) || \leq \mathbb{E} [||\boldsymbol{w_{k}}||^2 | \boldsymbol{\theta_{k}} ] \leq \sigma^2 
+   || \text{Var}(\boldsymbol{w_{k}} | \boldsymbol{\theta_{k}}) || \leq \mathbb{E} [||\boldsymbol{w_{k}}||^2 | \boldsymbol{\theta_{k}} ] \leq \sigma^2
 \end{aligned}
 $$
 
-So our conditional variance must be bounded by some constant variance $\sigma^2$. 
+So our conditional variance must be bounded by some constant variance $\sigma^2$.
 
-Next, we want to observe a sequence of $\boldsymbol{\theta_{k}}$ generated by SGD after $T$ iterations, $k \in \{1,...,T\}$. Let $\bar{\boldsymbol{\theta}}_T = \frac{1}{T} \sum_{k=0}^{T-1}{\boldsymbol{\theta_{k+1}}}$ and $\alpha \leq \frac{1}{2L}$.  
+Next, we want to observe a sequence of $\boldsymbol{\theta_{k}}$ generated by SGD after $T$ iterations, $k \in \{1,...,T\}$. Let $\bar{\boldsymbol{\theta}}_T = \frac{1}{T} \sum_{k=0}^{T-1}{\boldsymbol{\theta_{k+1}}}$ and $\alpha \leq \frac{1}{2L}$.
 
 Under these assumptions, we show the following convergence for SGD.
 
 $$
 \begin{aligned}
-    \mathbb{E}[f(\bar{\boldsymbol{\theta}}_T)-f(\boldsymbol{\theta}^*)] \leq \frac{1}{2 \alpha_k T}|| \boldsymbol{\theta_0} - \boldsymbol{\theta^*} ||^2 + \alpha_k \sigma^2 
+    \mathbb{E}[f(\bar{\boldsymbol{\theta}}_T)-f(\boldsymbol{\theta}^*)] \leq \frac{1}{2 \alpha_k T}|| \boldsymbol{\theta_0} - \boldsymbol{\theta^*} ||^2 + \alpha_k \sigma^2
 \end{aligned}
 $$
 
