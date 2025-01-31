@@ -7,6 +7,12 @@ interface Project {
 
 const projectsData: Project[] = [
   {
+    title: 'Spatial Statistical Modeling of Wildfire Incidence in Arizona',
+    description: `An exploration in spatial statistical modeling of wildfire incidence, assessing risk in Coconino County of Northern Arizona`,
+    imgSrc: '/static/files/spstat_wfincidenceAZ/images/spatialstatslink.gif',
+    href: 'blog/spstat_wfincidenceAZ',
+  },
+  {
     title: 'Machine Learning Optimization',
     description: `A dive into techniques and statistical background in machine learning optimization, with focus upon stochastic gradient descent, variance reduction techniques, and the bias-variance tradeoff`,
     imgSrc: '/static/files/ml_optimization/images/ml_opt_link.gif',

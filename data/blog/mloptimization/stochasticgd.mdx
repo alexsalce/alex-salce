@@ -1,0 +1,140 @@
+---
+title: Machine Learning Optimization - Stochastic Gradient Descent
+date: 'January 2025'
+tags: ['sub-post']
+layout: PostSimple
+images: ['/static/files/ml_optimization/images/ml_optimizationheader.png']
+draft: false
+summary: A dive into techniques and statistical background in machine learning optimization, with focus upon stochastic gradient descent, variance reduction techniques, and the bias-variance tradeoff.
+# bibliography: /bib/mloptimization.bib
+---
+
+> # Table of Contents
+> ## [0: Introduction](/blog/mloptimization)
+> ## [1: Crash Course: Gradient Descent](/blog/mloptimization/gd)
+> ## [3: Variance Reduction Techniques](/blog/mloptimization/variancereduction)
+> ## [4: SARAH and ADAM Algorithms](/blog/mloptimization/sarahadam)
+
+## [Previous: ML Optimization Splash Page](/blog/mloptimization)
+
+## Stochastic Gradient Descent
+
+Stochastic methods are common in many areas of computational mathematics and are desirable for improving computational performance by leveraging random operations. A stochastic approach to gradient descent is a natural extension; we want to speed up an inherently slow but robust method for training our machine learning models.
+
+The core concept of stochastic gradient descent is straightforward -- rather than performing a full gradient calculation at each timestep of gradient descent, we can sample individual gradients $\nabla f_i$'s (where $i$ is selected uniformly at random from $1,...n$) in lieu of computing the full gradient $\nabla f$. We use a randomly sampled $\nabla f_i$ at each step as a general approximation for the full gradient $\nabla f$ in the descent algorithm to step toward the solution at significantly reduced computational cost, with the concession that the step is an approximation. 
+
+*See [appendix](/blog/mloptimization#stochastic-gradient-calculation) for more details on stochastic gradient calculation*.
+
+So, we would like to show that this randomly sampled gradient is a valid estimator of the true gradient.
+
+### SGD Algorithm
+
+For stochastic descent, we want to consider the following problem, minimizing the average of functions, where $f$ is our objective function, a function of our model parameters $\theta$.
+
+$$
+\begin{aligned}
+    \underset{\boldsymbol{\theta}}{\text{min}f(\boldsymbol{\theta})}\overset{\Delta}{=}\frac{1}{n}\sum_{i=1}^{n}{f_{i}(\boldsymbol{\theta})} 
+\end{aligned}
+$$
+
+Taking the gradient of this objective function $f$ gives
+
+$$
+\begin{aligned}
+    \nabla f(\boldsymbol{\theta}) = \frac{1}{n}\sum_{i=1}^{n}{\nabla f_{i}(\boldsymbol{\theta})}
+\end{aligned}
+$$
+
+Stochastic gradient descent (SGD) is defined as the following.
+
+$$
+\begin{aligned}
+    \boldsymbol{\theta}_{k+1}=\boldsymbol{\theta}_{k}-\alpha_{k} \nabla f_{i_{k}}(\boldsymbol{\theta}_{k})
+\end{aligned}
+$$
+
+where $i_{k} \in \{1,...,n\}$ is an index chosen uniformly at random for an iteration $k$. 
+
+> [!NOTE] 
+> SGD cannot converge with a fixed step size; instead it must use a diminishing step size that satisfies $\underset{k \rightarrow \infty}{\text{lim }\alpha_{k} = 0}$ and $\overset{\infty}{\underset{k=1}{\sum}}{\alpha_{k}} = \infty$. Hence learning rate is denoted with $\alpha_{k}$.
+
+We want to determine whether $\nabla f_{i_{k}}(\boldsymbol{\theta}_{k})$ is a valid estimator for the true gradient $\nabla f(\boldsymbol{\theta}_{k})$, so we are interested in its expectation. Since $i_k$ is selected uniformly at random, the following expectation holds.
+
+$$
+\begin{aligned}
+    \mathbb{E}[\nabla f_{i_{k}}(\boldsymbol{\theta}_{k})] = \sum_{i=1}^{n}{P(i=i_{k}) \nabla f_{i_{k}}(\boldsymbol{\theta}_{k})} = \frac{1}{n} \sum_{i=1}^{n}{ \nabla f_{i_{k}}(\boldsymbol{\theta}_{k})} = \nabla f(\boldsymbol{\theta}_{k}) 
+\end{aligned}
+$$
+
+So, an individual gradient is an unbiased estimator for the full gradient, a fundamental principle to stochastic gradient descent.
+
+This presents a great computational advantage -- since we are selecting an individual gradient at random $\nabla f_{i_{k}}$, $i_{k} \in \{1,...,n\}$ for each iteration of SGD, it doesn't matter what the sample size of our data is. The sample size of the data $n$ could be very large and an SGD computation will "cost" the same per iteration.
+
+<div className="-mx-2 flex flex-wrap overflow-hidden xl:-mx-2">
+  <div className="my-1 w-full overflow-hidden px-2 xl:my-1 xl:w-1/2 xl:px-2">
+    ![SGD](/static/files/ml_optimization/images/stochasticgds_sgdfast.gif)
+  </div>
+  <div className="my-1 w-full overflow-hidden px-2 xl:my-1 xl:w-1/2 xl:px-2">
+    ![Compare](/static/files/ml_optimization/images/stochasticgds.gif)
+  </div>
+</div>
+
+On the left, we see the SGD optimizer algorithm stepping the parameters toward the solution in some obviously approximate ways. On the right, we also impose other algorithms that we will revisit later that use variance reduction technniques for comparison.
+
+Since we are now taking steps in our descent algorithm using approximations of the gradient, we are going to be taking steps only approximately in the direction of the optimum.
+
+### SGD Convergence and Variance
+
+The inexactness of the steps that we have now introduced to gradient descent is variance. Variance in our algorithm's steps can in fact slow the algorithm down in its own right (we are only approximately stepping in the right direction after each step), so we must take additional considerations to how we approach the development of SGD algorithms. First, we must be able to quantify the variance.
+
+An analysis of convergence of SGD reveals how we quantify the variance in the algorithm's steps. The SGD algorithm can be rewritten as the following.
+
+$$
+\begin{aligned}
+    \boldsymbol{\theta}_{k+1}=\boldsymbol{\theta}_{k}-\alpha_{k} [\nabla f(\boldsymbol{\theta}_{k})-\underset{w_{k}}{\underbrace{(\nabla f(\boldsymbol{\theta}_{k})-\nabla f_{i_{k}}(\boldsymbol{\theta}_{k}))}}] 
+\end{aligned}
+$$
+
+ We assume $f$ is convex and that $\nabla f$ is Lipschitz continuous.  First, we define $\boldsymbol{w_{k}} \overset{\Delta}{=} \nabla f(\boldsymbol{\theta_{k}}) - \nabla f_{i_{k}}(\boldsymbol{\theta_{k}})$. $\boldsymbol{w_{k}}$ quantifies the error between the full gradient and a stochastic gradient at iteration $k$. 
+ 
+ Next, we take the conditional expectiation of $\boldsymbol{w_{k}}$ given parameters $\boldsymbol{\theta_{k}}$,
+
+$$
+\begin{aligned}
+    \mathbb{E} [\boldsymbol{w_{k}} | \boldsymbol{\theta_{k}}] = \mathbb{E} [ \nabla f(\boldsymbol{\theta_{k}}) - \nabla f_{i_{k}}(\boldsymbol{\theta_{k}}) | \boldsymbol{\theta_{k}}] =  \nabla f(\boldsymbol{\theta_{k}}) - \underset{\nabla f (\boldsymbol \theta_{k})}{\underbrace{\mathbb{E} [\nabla f_{i_{k}}(\boldsymbol{\theta_{k}}) | \boldsymbol{\theta_{k}}]}} = 0  
+\end{aligned}
+$$
+
+ We establish $\boldsymbol{w_{k}}$ is conditionally unbiased as an assumption. Now we take the conditional variance and use the conditional unbiasedness assumption for the following.
+
+ $$
+\begin{aligned}
+    \text{Var}(\boldsymbol{w_{k}} | \boldsymbol{\theta_{k}}) = \mathbb{E} [\boldsymbol{w_{k}} \boldsymbol{w_{k}}^T | \boldsymbol{\theta_{k}}] - \underset{=0}{\underbrace{\mathbb{E} [\boldsymbol{w_{k}} | \boldsymbol{\theta_{k}}]^2 }} 
+\end{aligned}
+$$
+
+ We can now use the [Cauchy-Schwarz Inequality](https://en.wikipedia.org/wiki/Cauchy%E2%80%93Schwarz_inequality) to show
+
+ $$
+\begin{aligned}
+    || \text{Var}(\boldsymbol{w_{k}} | \boldsymbol{\theta_{k}}) || \leq \mathbb{E} [||\boldsymbol{w_{k}}||^2 | \boldsymbol{\theta_{k}} ] \leq \sigma^2 
+\end{aligned}
+$$
+
+So our conditional variance must be bounded by some constant variance $\sigma^2$. 
+
+Next, we want to observe a sequence of $\boldsymbol{\theta_{k}}$ generated by SGD after $T$ iterations, $k \in \{1,...,T\}$. Let $\bar{\boldsymbol{\theta}}_T = \frac{1}{T} \sum_{k=0}^{T-1}{\boldsymbol{\theta_{k+1}}}$ and $\alpha \leq \frac{1}{2L}$.  
+
+Under these assumptions, we show the following convergence for SGD.
+
+$$
+\begin{aligned}
+    \mathbb{E}[f(\bar{\boldsymbol{\theta}}_T)-f(\boldsymbol{\theta}^*)] \leq \frac{1}{2 \alpha_k T}|| \boldsymbol{\theta_0} - \boldsymbol{\theta^*} ||^2 + \alpha_k \sigma^2 
+\end{aligned}
+$$
+
+If we select $\alpha_k = \frac{1}{\sqrt{T}}$, we achieve a convergence rate of $\mathcal{O}(\frac{1}{\sqrt{T}})$, which is an improvement over regular gradient descent. Note here, $\alpha_k$ decays as we step, so the algorithm "slows down" as we proceed. The variance in the steps requires that our learning rate decays, which is generally undesirable.
+
+We are able to quantify a bound for the variance of SGD, and we can now start to explore what different approaches we may take to reduce it.
+
+## [Next: Variance Reduction Techniques](/blog/mloptimization/variancereduction)

@@ -1,0 +1,424 @@
+---
+title: Machine Learning Optimization - SARAH and ADAM Algorithms
+date: 'January 2025'
+tags: ['sub-post']
+layout: PostSimple
+images: ['/static/files/ml_optimization/images/ml_optimizationheader.png']
+draft: false
+summary: A closer look at SARAH and ADAM GD variance reduction algorithms
+# bibliography: /bib/mloptimization.bib
+---
+
+> # Table of Contents
+> ## [0: Introduction](/blog/mloptimization)
+> ## [1: Crash Course: Gradient Descesnt](/blog/mloptimization/gd)
+> ## [2: Stochastic Gradient Descent](/blog/mloptimization/stochasticgd)
+> ## [3: Variance Reduction Techniques](/blog/mloptimization/variancereduction)s
+
+## SARAH
+
+SARAH, or StochAstic Recursive grAdient algoritHm, is a stochastic gradient descent method that utilizes *recursive gradient information* to reduce variance in the steps. The algorithm is a modification of the method SVRG (Stochastic Variance Reduced Gradient), which we will briefly cover, and is widely used as one of the benchmark algorithms for comparison to new gradient descent style methods. As with other methods we have seen until now, some of its core assumptions for convergence require a convex objective function (or strongly-convex) with Lipschitz continuous gradient. SARAH is a good example of an algorithm that is actually biased, but can be an improvement over SVRG if conditions are considered carefully.
+
+### Stochastic Variance Reduced Gradient (SVRG)
+
+To understand the SARAH algorithm, we need to first conceptually understand SVRG.  First, we present the SVRG algorithm.
+
+<div className="-mx-2 flex flex-wrap justify-center overflow-hidden xl:-mx-2">
+![SVRG algorithm](/static/files/ml_optimization/images/svrg_alg.png#center)
+</div>
+
+The algorithm consists of an *outer loop* and an *inner loop*, both with iterations specified as hyperparameters.  We select the number of epochs $T$ (each "epoch" is one pass over all samples in the dataset) for the outer loop, and the number of inner loop iterations $m$.
+
+The outer loop performs one full gradient computation using the initialized parameter $\tilde{\boldsymbol{\theta}}$, which begins with the initialized parameter $\tilde{\boldsymbol{\theta}}_0$ that is used to make one full gradient computation $\tilde{g}$ (hence outer loop "epochs"). $\tilde{\boldsymbol{\theta}}$ is then used to initialize the inner loop updates $\boldsymbol{\theta}_0$, and fed into the loop with $\tilde{g}$.
+
+The inner loop then begins, using a stochastic gradient approach in combination with an iteratively updated gradient estimate $v_{t-1} = \nabla f_{i_{t}} (\boldsymbol{\theta}_{t-1}) - \nabla f_{i_{t}} (\tilde{\boldsymbol{\theta}}) + \tilde{g}$, utilizing the outer loop full gradient $\tilde{g}$, the stochastic gradient computed from the most recent parameter update $\nabla f_{i_{t}} (\boldsymbol{\theta}_{t-1})$, and the corresponding full-gradient sample $\nabla f_{i_{t}} (\tilde{\boldsymbol{\theta}})$. The gradient estimate is then used for a normal gradient descent style parameter update.
+
+All parameter updates occur within the inner loop, and the resulting parameters from the inner loop get fed back into the outer loop as the new parameter initialization.
+
+
+#### SVRG Gradient Estimator
+
+We want to analyze our gradient estimate, so we take its expectation conditioned on knowledge of $\boldsymbol{\theta}_{t-1}$.
+
+$$
+\begin{aligned}
+    \mathbb{E} [v_{t-1}|\boldsymbol{\theta}_{t-1}] = \mathbb{E}[ \nabla f_{i_{t}} (\boldsymbol{\theta}_{t-1}) - \nabla f_{i_{t}} (\tilde{\boldsymbol{\theta}}) + \tilde{g} ] = \mathbb{E}[ \nabla f_{i_{t}} (\boldsymbol{\theta}_{t-1}) ] - \mathbb{E}[ \nabla f_{i_{t}} (\tilde{\boldsymbol{\theta}}) ] + \tilde{g}
+\end{aligned}
+$$
+
+$$
+\begin{aligned}
+     = \underset{\nabla f (\boldsymbol{\theta}_{t-1})}{\underbrace{\frac{1}{n} \sum_{i=1}^{n}{\nabla f_{i_{t}}(\boldsymbol{\theta}_{t-1})}}} - \underset{\tilde{g}}{\underbrace{\frac{1}{n} \sum_{i=1}^{n}{\nabla f_{i_{t}} (\tilde{\boldsymbol{\theta}})}}} + \tilde{g} = \nabla f (\boldsymbol{\theta}_{t-1})
+\end{aligned}
+$$
+
+So, the SVRG gradient estimator for the inner loop updates is *unbiased*.
+
+#### SVRG Variance Reduction
+
+The variance reduction for SVRG is accomplished with the inner loops by the convergence of both $\boldsymbol{\theta}_{t}$ and $\tilde{\boldsymbol{\theta}}$ to the same optimal parameter ${\theta}^{*}$. Omitting the detailed proof [@Johnson] ([link](https://papers.nips.cc/paper/2013/file/ac1dd209cbcc5e5d1c6e28598e8cbbe8-Paper.pdf)), the following holds for convex (and strongly convex) objective functions with Lipschitz continuous gradients.
+
+$$
+\begin{aligned}
+    \tilde{g} = \frac{1}{n} \sum_{i=1}^{n}{\nabla f_{i} (\tilde{\boldsymbol{\theta}})} \underset{\tilde{\theta}\rightarrow\theta^{*}}{\rightarrow} \frac{1}{n} \sum_{i=1}^{n}{\nabla f_{i} (\boldsymbol{\theta}^*)} \rightarrow 0 
+\end{aligned}
+$$
+
+So if $\nabla f_{i} (\tilde{\boldsymbol{\theta}}) \rightarrow \nabla f_{i} (\boldsymbol{\theta}^*)$, then
+
+$$
+\begin{aligned}
+    v_{t-1} =  \nabla f_{i_{t}} (\boldsymbol{\theta}_{t-1}) - \nabla f_{i_{t}} (\tilde{\boldsymbol{\theta}}) + \tilde{g} \underset{\tilde{\theta}\rightarrow\theta^{*}\text{, } \theta_{t-1}\rightarrow\theta^{*}}{\rightarrow}  \nabla f_{i_{t}} (\boldsymbol{\theta}^{*}) - \nabla f_{i_{t}} (\boldsymbol{\theta}^{*})  \rightarrow 0
+\end{aligned}
+$$
+
+This means that the variance of the gradient estimates approach zero as the parameter updates converge to the optimum $\boldsymbol{\theta}^{*}$, hence the inner loops serve as a variance reduction technique, but in order for overall variance in the steps to decrease we must update $\tilde{\boldsymbol{\theta}}$ (so that $\nabla f_{i} (\tilde{\boldsymbol{\theta}}) \rightarrow \nabla f_{i} (\boldsymbol{\theta}^*)$), meaning that we must execute additional full gradient computations (epochs). We will revisit this point in the analysis of [the variance reduction of SARAH](#sarah-variance-reduction).
+
+#### SVRG Convergence
+
+For convex and Lipschitz continuous gradient objective functions $f_i$, SVRG can be shown to converge at a rate of $\mathcal{O} (\frac{1}{T})$, which is an improvement over SGD's $\mathcal{O} (\frac{1}{\sqrt{T}})$. It also has better theoretical convergence, $\mathcal{O} (n\log\frac{1}{\epsilon} + \frac{L}{\epsilon})$, than SAG and SAGA, ($\mathcal{O} (\frac{n+L}{\epsilon})$) (*note convergence here is in terms of specified tolerance $\epsilon$ rather than number of iterations $T$*).
+
+For a [$\mu$-strongly](#convexity) convex objective function, SVRG converges to the following.
+
+Assume $m$ is sufficiently large such that the following holds.
+
+$$
+\begin{aligned}
+    \beta_m = \frac{1}{\mu \alpha (1-2L \alpha)m} + \frac{2L \alpha}{1-2L \alpha} < 1
+\end{aligned}
+$$
+
+then,
+
+$$
+\begin{aligned}
+    \mathbb{E} [f(\tilde{\boldsymbol{\theta}}_s)] - f(\boldsymbol{\theta}^*) \leq \beta^s (f(\tilde{\boldsymbol{\theta}}_s) - f(\boldsymbol{\theta}^*)) 
+\end{aligned}
+$$
+
+The complexity is $\mathcal{O}((n+\frac{L}{\mu}) \log(\frac{1}{\epsilon}))$, which is comparable to SAG/SAGA. This also gives us criteria for which to select inner loop size $m$ and learning rate $\alpha$.
+
+Unlike SGD, we do not need a decaying learning rate for SVRG to achieve the comparable convergence rate. The decaying learning rate required for SGD is a consequence of the variance in the steps (even though variance can be unbounded), which is a good example of how variance can impact convergence rate; SVRG explicitly reduces the variance in the steps of SGD.
+
+### The SARAH Algorithm
+
+Methodology in this section is drawn from *SARAH: A Novel Method for Machine Learning Problems Using Stochastic Recursive Gradient* [@nguyen] ([link](https://arxiv.org/abs/1703.00102))
+
+([Nguyen, Liu, Scheinberg, and Takáč, 2017](https://arxiv.org/abs/1703.00102))
+
+<div className="-mx-2 flex flex-wrap justify-center overflow-hidden xl:-mx-2">
+![SARAH algorithm](/static/files/ml_optimization/images/sarah_alg.png#center)
+</div>
+
+SARAH is very closely related to SVRG.  It utilizes the same outer/inner loop apprach that functionally serve the same purpose; the outer loop is used to compute a full gradient (a "snapshot" of the full gradient), and the inner loop performs SGD style steps with a variance reduction design. The key difference between SVRG and SARAH is in the gradient estimate update step in the inner loop.
+
+SVRG's gradient estimate is designed to use the outer loop "snapshot" to generate an unbiased gradient estimate at each step, while simultaneously reducing the variance that is a consequence of SGD. The "snapshot" is what stablizes the algorithm in terms of bias (the gradient estimate is unbiased) and allows the variance in the stochastic steps to be reduced using the parameters from which the outer loop was initialized.
+
+SARAH's gradient estimate, however, leans more heavily into the variance-reduction aspect of the algorithm by utilizing *recursive* gradient information to reduce variance, rather than solely using the gradient estimate from the outer loops. This improves the stochastic variance reduction power of the algorithm, but at the expense of introducing bias.
+
+#### SARAH Gradient Estimator
+
+The gradient estimate (also referred to as the "SARAH update") utilizes a similar framework to SVRG. Recall the SVRG gradient estimate.
+
+The SARAH estimator modifies the gradient estimate by replacing the gradient esimate terms from the outer loop initialization with a recursive gradient update.
+
+$$
+\begin{aligned}
+    v_{t-1} =  \nabla f_{i_{t}} (\boldsymbol{\theta}_{t-1}) - \underset{\text{outer loop terms}}{\underbrace{ \nabla f_{i_{t}} (\tilde{\boldsymbol{\theta}}) + \tilde{g}}}
+\end{aligned}
+$$
+
+$$
+\begin{aligned}
+    v_{t}=\nabla f_{i_{t}}(\theta_{t})-\nabla f_{i_{t}}(\theta_{t-1})+v_{t-1}
+\end{aligned}
+$$
+
+We note that there is a shift in index as we now need to use both the most recent random gradient as well as the random gradient from the previous step. This also means that we must perform one parameter update in the outer loop before we enter the inner loop.
+
+Each gradient estimate uses every previous gradient estimate from the inner loop for each inner loop update, hence a "recursive" update framework as opposed to each update using the outer loop initialization only.
+
+Let's take the conditional expectation of the gradient estimate, given all previous iterates of $\boldsymbol{\theta}_{t}$. We will call this $\mathcal{F}_t$, the [$\sigma$-algebra](https://en.wikipedia.org/wiki/%CE%A3-algebra) generated by the inital $\boldsymbol{\theta}_{0}$ and all subsequent randomly chosen indices for the inner loop $\mathcal{F}_t = \sigma(\boldsymbol{\theta}_{0}, i_1,...,i_{t-1})$. Note that $\mathbb{E}[v_{t}|\mathcal{F}_t] = \mathbb{E}_{i_t}[v_{t}]$.
+
+$$
+\begin{aligned}
+    \mathbb{E}_{i_t}[v_{t}] = \nabla f(\theta_{t}) - \nabla f(\theta_{t-1}) + v_{t-1} \neq \nabla f(\theta_{t})
+\end{aligned}
+$$
+
+The steps are omitted, but the result is notable as it is *not* an unbiased estimator for the gradient. However, the *total* expectation holds.
+
+$$
+\begin{aligned}
+    \mathbb{E}[v_t] = \nabla f(\theta_{t})
+\end{aligned}
+$$
+
+So, an exact full pass over the data for an inner loop is unbiased.
+
+#### SARAH Variance Reduction
+
+Recall for SVRG that in order for overall variance in the steps to reduce, [we must execute additional outer loops](#svrg-variance-reduction); in order for $\nabla f_{i} (\tilde{\boldsymbol{\theta}}) \rightarrow \nabla f_{i} (\boldsymbol{\theta}^*)$ to hold, we must update $\tilde{\boldsymbol{\theta}}$ via an outer loop computation.
+
+In the analysis of SVRG we showed that stochastic gradients are unbiased estimators for the full gradient, and that $\nabla f_{i_{t}} (\boldsymbol{\theta}^{*}) - \nabla f_{i_{t}} (\boldsymbol{\theta}^{*})  \rightarrow 0$. Since the inner loop terms only utilize stochastic gradients for the gradient estimate, the inner loops will reduce variance without requiring an outer loop as there are no terms in the estimator dependent upon the outer loop update.
+
+SARAH's variance bound in the $\mu$-strongly convex objective function case can be shown to be less than the variance bound of the same objective function with SVRG.
+
+$$
+\begin{aligned}
+    \sigma_{m}\stackrel{def}{=}\frac{1}{\mu\eta(m+1)}+\frac{\eta L}{2-\eta L}  <  \frac{1}{\mu\eta(1-2L\eta)m}+\frac{1}{\frac{1}{2\eta L}-1}=\beta_m
+\end{aligned}
+$$
+
+The variance reduction of the inner loops is at the expense of bias; SARAH reduces variance in the inner loops but now has bias that is itself stochastic. This bias can be somewhat "corrected" for, however, by executing an outer loop to reinitialize the parameters by pointing them in the correct direction. We will examine some intelligent ways to execute outer loops when necessary using [SARAH+](#sarah%2B-algorithm).
+
+#### SARAH Convergence
+
+For convex and Lipschitz continuous gradient objective functions $f_i$, SARAH can be shown to converge at a rate of $\mathcal{O}((n+\frac{1}{\epsilon}) \log(\frac{1}{\epsilon}))$. Better conditioned $f_i$s that are $\mu$-strongly convex converge at a rate of $\mathcal{O}((n+\frac{L}{\mu}) \log(\frac{1}{\epsilon}))$. 
+
+Comparing these rates directly to SVRG,
+
+| Convexity | SVRG | SARAH |
+| --- | --- | --- |
+| Convex | $\mathcal{O} (n\log\frac{1}{\epsilon} + \frac{L}{\epsilon})$ | $\mathcal{O}((n+\frac{1}{\epsilon}) \log(\frac{1}{\epsilon}))$ |
+| Strong Convexity  | $\mathcal{O}((n+\frac{L}{\mu}) \log(\frac{1}{\epsilon}))$ | $\mathcal{O}((n+\frac{L}{\mu}) \log(\frac{1}{\epsilon}))$ |
+
+Similar to SVRG, we must select our inner loop size $m$ and learning rate such that the following holds.
+
+$$
+\begin{aligned}
+    \sigma_{m}\stackrel{def}{=}\frac{1}{\mu\eta(m+1)}+\frac{\eta L}{2-\eta L} < 1 
+\end{aligned}
+$$
+
+Recall from [above](#sarah-variance-reduction) that the variance bound for SARAH in the strongly convex case is smaller than that of SVRG. So, while their convergence complexity is the same for strong convexity, SARAH can use a larger learning rate than SVRG. SVRG must use a learning rate of $\eta < \frac{1}{4L}$ whereas SARAH can use $\eta < \frac{1}{L}$.
+
+<div className="-mx-2 flex flex-wrap overflow-hidden xl:-mx-2">
+  <div className="my-1 w-full overflow-hidden px-2 xl:my-1 xl:w-1/2 xl:px-2">
+    ![SARAH and SVRG zoomed](/static/files/ml_optimization/images/sarahsvrgzoom.png)
+  </div>
+  <div className="my-1 w-full overflow-hidden px-2 xl:my-1 xl:w-1/2 xl:px-2">
+    ![SARAH and SVRG run same inner and outer loops](/static/files/ml_optimization/images/sarahsvrg.png)
+  </div>
+</div>
+
+We revisit a side by side comparison of SARAH and SVRG, both run with the same number of inner and outer loops with the same hyperparameter settings. The first image is zoomed in to highlight how each algorithm handles variance reduction. SARAH has very little variance, but requires outer loop executions to correct for its inner loop bias (outer loops happen at the "kinks"). SVRG starts moving toward the solution sooner, but has higher variance in its steps until we execute more outer loops, and it smooths as more outer loops are executed (our gradient estimate becomes better).  In the same number of iterations, however, they are fairly comparable.  This is only a very simple example to illustrate their general behaviors, but reinforces that they are very similar algorithms in nature and performance.  So, there are some advantages to SARAH over SVRG, but not necessarily overwhelmingly so.
+
+#### SARAH+ Algorithm
+
+
+<div className="-mx-2 flex flex-wrap justify-center overflow-hidden xl:-mx-2">
+![SARAH+ algorithm](/static/files/ml_optimization/images/sarah+_alg.png#center)
+</div>
+
+@nguyen ([link](https://arxiv.org/abs/1703.00102)) present this variant of the SARAH algorithm that provides an automatic and adaptive inner loop size. Numerical experiments from the paper indicate a selection of $\gamma=1/8$ shows benefits in rate for their numerical experiments, but does not elaborate on any theory.
+
+This modification introduces an automated methodology for breaking the inner loop such that inner loop size $m$ can be adaptive. It also serves as automation to correct for bias in the inner loops with the execution of a full outer loop gradient.
+
+### Applications of SARAH
+
+In practice, SARAH can be a direct substitute for SVRG with only some updated parameter tuning considerations, so it can be utilized for a very large variety of applications as a SVRG replacement. However, it does not seem to be used as widely in practice as SVRG.  While speculation as to why is not worthwhile, it is noteworthy that SARAH's variance reduction technique utilizes a biased methodology, where SVRG is unbiased. SVRG is a widely utilized benchmark algorithm, and many machine learning packages have SVRG built in; the same cannot be said for SARAH, and while it does have theoretical advantages, it does not seem to have penetrated the infrastructure of optimization algorithms in practice. Still, there is a fair amount of research available for futher modifications of SARAH.  
+
+
+## ADAM
+
+Methodology in this section is drawn from *Adam: A Method for Stochastic Optimization* [@kingma] ([link](https://arxiv.org/abs/1412.6980)). 
+
+ADAM is a widely popular optimizer in machine learning. It is a staple for deep learning, neural networks, natural language processing, and generative adversarial networks applications, to name a few.  ADAM has some unique strengths against other optimizers; it is fast, requires little hyperparameter tuning, performs well with sparse gradients, and can be applied to stochastic objective functions. It is also an adaptive algorithm that uses adaptive step sizes according to data it has seen to speed up convergence. 
+
+The ADAM optimizer is a stochastic/batch gradient descent variant that utilizes two techniques that leverage previous gradient information (conceptually adjacent to recursion we saw in SARAH), **Momentum** and **RMSProp** (Root Mean Squared Propogation). Momentum acts to dampen oscillations by using previous gradient moving averages to decrease the variance in steps. RMSProp adaptively scales the learning rate based upon an exponential weighted average of the magnitude of recent gradients, so it can "speed up" and "slow down" such that it does not diverge from the local data. Additionally, ADAM can utilize batch gradients rather than only individual stochastic gradients, which can act as variance reduction by increasing sample size. 
+
+### The Algorithm
+
+<div className="-mx-2 flex flex-wrap justify-center overflow-hidden xl:-mx-2">
+![ADAM algorithm](/static/files/ml_optimization/images/adam_alg.png#center)
+</div>
+
+> [!NOTE] 
+> $g_t^2$ is equivalent to element-wise multiplication of gradients $g_1 \odot g_2$
+
+#### Variance Reduction
+
+##### Momentum
+
+Polyak's momentum is a technique that uses both the current gradient as well as the history of gradients in previous steps to accelerate convergence. The momentum term is incorporated in general with gradient descent style algorithm and uses a hyperparameter $\beta \in [0,1)$ to scale its weight.
+
+$$
+\begin{aligned}
+    \theta_{k+1} = \theta_{k} - \alpha \nabla f(\theta_k) + \beta(\theta_{k} - \theta_{k-1})
+\end{aligned}
+$$
+
+If we expand this term,
+
+$$
+\begin{aligned}
+    \theta_{k+1} = \theta_{k} - \alpha \nabla f(\theta_k) + \beta( \theta_{k-1} - \alpha \nabla f(\theta_{k-1}) + \beta(\theta_{k-1} - \theta_{k-2}) - \theta_{k-1})
+\end{aligned}
+$$
+
+$$
+\begin{aligned}
+    = \theta_{k} - \alpha \nabla f(\theta_k) - \beta \alpha \nabla f(\theta_{k-1}) + \underset{\text{higher order } \beta \text{ small}}{\underbrace{\beta^2(\theta_{k-1} - \theta_{k-2})}}
+\end{aligned}
+$$
+
+If these recent gradients are similar, the algorithm gets an additional "boost", or "momentum". $\theta_{k-1}$ and so on can be expanded similarly, and we get higher order $\beta$ terms as the algorithm iterates. This favors the most recent gradients since $\beta \in [0,1)$ and higher order terms quickly dampen out previous iterates.
+
+<div className="-mx-2 flex flex-wrap overflow-hidden xl:-mx-2">
+  <div className="my-1 w-full overflow-hidden px-2 xl:my-1 xl:w-1/2 xl:px-2">
+    ![Momentum](/static/files/ml_optimization/images/momentumexampleplot.jpg)
+  </div>
+  <div className="my-1 w-full overflow-hidden px-2 xl:my-1 xl:w-1/2 xl:px-2">
+    ![Compare ADAM momentum](/static/files/ml_optimization/images/stochasticgds.gif)
+  </div>
+</div>
+
+*We see the "boost" in the animation for the ADAM algorithm compared to other stochastic methods, moving more rapidly toward the solution.*
+
+In ADAM, the momentum term is written as follows.
+
+$$
+\begin{aligned}
+    m_{t} = \beta_{1} \cdot m_{t-1} + (1 - \beta_{1}) \cdot g_{t}
+\end{aligned}
+$$
+
+Momentum helps to accelerate convergence, particularly over the contours of objective functions, while also acting as variance reduction in the steps. The technical details of variance reduction in stochastic methods are a little more involved and are covered in [@arnold2019] ([link](https://openreview.net/forum?id=r1qKBtJvG)). For and in-depth and beautifully interactive blog about momentum, [I also suggest this post](https://distill.pub/2017/momentum/).
+
+##### Minibatches
+
+[Earlier in this post](#minibatch-sgd) we covered the variance reduction properties of using stochastic minibatches for variance reduction in the steps. ADAM utilizes minibatches, and the batch size is a tuneable hyperparameter. This gives us the ability to use better gradient approximations for our steps and balance convergence with computation time.
+
+#### RMSProp
+
+Root-mean-squared propograaion (RMSProp) is a technique that uses the moving average of the magnitude of recent squared gradients to normalize the gradient estimate in the descent algorithm. Its implementation in descent algorithms makes the learning rate adaptive to the data, rather than treating it as a constant tuneable hyperparameter. In essence, the learning rate will speed up or slow down depending on recent gradients.
+
+The RMSProp update is similar to momentum, using the squared gradient term.
+
+$$
+\begin{aligned}
+    v_{t} = \beta_{2} \cdot v_{t-1} + (1 - \beta_{2}) \cdot g_{t}^2 
+\end{aligned}
+$$
+
+And the update rule in a gradient descent algorithm is written as follows.
+
+$$
+\begin{aligned}
+    \theta_{t} = \theta_{t-1} - \alpha \frac{\nabla f(\theta_k)}{\sqrt{v_{t-1}}+\epsilon}
+\end{aligned}
+$$
+
+The $\epsilon$ term only serves to stablize the algorithm as $v_t$ becomes small (the steps will become large if the denominator is small), preventing overshooting close to the optimum.
+
+#### Bias and Bias Correction
+
+The bias-correction steps in ADAM are enhancements to the momentum and RMSProp algorithms (which are themselves biased) and can be attributed to its advantageous performance with sparse data. ADAM is biased toward its initialization, which in general should be chosen to be the $\textbf{0}$ vector. 
+
+*We will follow the derivation of the bias terms as in* @kingma
+
+Our momentum term $m_t$, or the first moment estimator, is meant to estimate the gradient $g_t$, so we want to find the expectation of the first moment estimate $E[m_t]$.
+
+Let's first consider running ADAM for $T$ timesteps, and let $g_1,...,g_T$ be the gradients at each timestep. We assume the gradients are distributed as $g_t \sim p(g_t)$. At timestep $t$, the first moment estimate term is the following.
+
+$$
+\begin{aligned}
+    m_t = \beta_1 \cdot m_{t-1} + (1-\beta_1) \cdot g_t
+\end{aligned}
+$$
+
+We initialize the first moment weights setting $m_{0}=\textbf{0}$ and expand this term by substituting $m_{t-1}$ with each previous timestep, we get
+
+$$
+\begin{aligned}
+    m_t = (1-\beta_1) \sum_{i=1}^{t}{\beta_1^{t-i} \cdot g_i }
+\end{aligned}
+$$
+
+Now, we can then take the expectation of $m_t$.
+
+$$
+\begin{aligned}
+    \mathbb{E}[m_{t}] = \mathbb{E} \left[ (1-\beta_1) \sum_{i=1}^{t}{\beta_1^{t-i} \cdot g_i} \right]
+\end{aligned}
+$$
+
+We can rewrite $\sum_{i=1}^{t}{\beta_1^{t-i} \cdot g_i}$ by adding and subtracting $g_t$, giving $\sum_{i=1}^{t}{\beta_1^{t-i} \cdot (g_i + g_t - g_t)}$, giving the following.
+
+$$
+\begin{aligned}
+    \sum_{i=1}^{t}{\beta_1^{t-i} \cdot g_t} + \underset{\zeta}{\underbrace{\sum_{i=1}^{t}{\beta_{1}^{t-i}\cdot(g_{i}-g_{t})}}}
+\end{aligned}
+$$
+
+Recent gradients will be close to $g_t$, and gradients further in the past will be quickly dampened by $\beta_1^{t-i}$ as it should be selected to be small, so the $\zeta$ term can be treated as small.  So, our expectation can be written as the following.
+
+$$
+\begin{aligned}
+    \mathbb{E}[m_{t}] = \mathbb{E} \left[ (1-\beta_1) \sum_{i=1}^{t}{\beta_1^{t-i} \cdot g_t} + \zeta \right] 
+\end{aligned}
+$$
+
+$$
+\begin{aligned}
+    = \mathbb{E}[g_t] \cdot (1-\beta_1) \sum_{i=1}^{t}{\beta_1^{t-i} } + \zeta
+\end{aligned}
+$$
+
+Expanding the sum and cancellations of $\beta_1$ term results in the following.
+
+$$
+\begin{aligned}
+    \mathbb{E}[m_{t}] = \mathbb{E}[g_t] \cdot (1-\beta_1^t) + \zeta
+\end{aligned}
+$$
+
+The calculation steps for the second moment estimates follow identical logic, and we get the following expectation for $v_{t}$.
+
+$$
+\begin{aligned}
+    \mathbb{E}[v_{t}]=\mathbb{E}[g_{t}^{2}]\cdot(1-\beta_{2}^{t})+\zeta
+\end{aligned}
+$$
+
+Clearly, $m_t$ is a biased estimator for $g_t$, and $v_t$ is biased for $g_t^2$.
+
+We can approximately correct for bias in each term by assuming initialization of moments to be zero, and by dividing the respective estimates by the $(1-\beta_{1}^t)$ and $(1-\beta_{2}^t)$ term for the first and second moment estimates respectively, giving approximately $\mathbb{E}[\hat{m}_{t}]=\mathbb{E}[g_{t}]$ and $\mathbb{E}[\hat{v}_{t}]=\mathbb{E}[g_{t}^{2}]$.
+
+#### ADAM Convergence
+
+ADAM requires only a basic convexity assumption of the objective function, and a similar but more relaxed assumption of Lipschitz continuity called $(L_0,L_1)$ smoothness [@wangprovable] ([link](https://arxiv.org/abs/2208.09900)). Foregoing the details, ADAM converges at a rate of $\mathcal{O}(\frac{1}{\sqrt{T}})$ (the detailed proof for ADAM's convergence can be found in [original paper](https://arxiv.org/abs/1412.6980)).
+
+Recall that this is the same theoretical convergence rate as SGD, however it is able to used a fixed learning rate rather than a diminishing step size. While its rate is less desirable than other algorithms we have seen, it is still a widely desirable algorithm for it's performance in practice.
+
+### Applications of ADAM
+
+ADAM is a very widely used optimizer, particularly for neural network, deep learning, and natural language processing applications amongst others. One of its advantages is how well it handles sparse data, which are commonly characteristic of the data for these types of tasks. While it is not the fastest method in terms of convergence, the methodologies it utilizes to balance stochasic variance while also addressing inherent estimator bias, making this method a trustworthy workhorse.
+
+There is existing infrastructure for ADAM among some common machine learning tools like [Keras](https://keras.io/api/optimizers/adam/), [scikit-learn](https://scikit-learn.org/stable/modules/generated/sklearn.neural_network.MLPClassifier.html), [PyTorch](https://pytorch.org/docs/stable/generated/torch.optim.Adam.html), and [TensorFlow](https://www.tensorflow.org/api_docs/python/tf/keras/optimizers/Adam), to name some prolific packages in industry and research applications, so it has been embraced by the community as an effective optimizer. Overall it is a robust optimizer with reliable performance for convex ([as well as nonconvex](https://arxiv.org/abs/2307.11782), @heconvergence) objectives.
+
+
+## Example Numerical Experiments
+
+> [!NOTE]
+> This section was lifted directly from my coursework. Note this section uses $x$ for the model parameter vector instead of the $\theta$ we have been using previously (different choices may be seen in practice).
+
+The purpose of the numerical experiment will be to evaluate general performance of ADAM and SARAH on real data and to illustrate a bias-variance tradeoff between SVRG and SARAH.
+We use the "Wine Quality" dataset from the UC Irvine Machine Learning Repository [@winequality]. The data are measurements of wine characteristics (features) used to predict wine quality scores. There are $n=6497$ instances and $m=11$ features. The experiements will use a simple least squares linear regression objective, assuming a system with data $A$ and response $b$ is of the form $Ax=b$.
+
+$$
+\begin{aligned}
+    \underset{x}{\text{min}}||Ax-b||^{2}
+\end{aligned}
+$$
+
+The least squares objective was chosen because it is strongly convex.  $x^*$ was computed separately using `scipy.optimize.lsq_linear` with tolerance set to $1e-10$.
+
+![Numerical Experiment Figure 1](/static/files/ml_optimization/images/numexp1.png)
+
+![Numerical Experiment Figure 2](/static/files/ml_optimization/images/numexp2.png)
+
+See Figures 1 and 2 for settings and computation time. The two examples chosen illustrate some high level takeaways. In terms of per-iteration computational performance, both ADAM and SARAH are virtually identical to SVRG, though ADAM can become slightly slower for increased batch sizes. SARAH and SVRG are limited in flexibility for learning rate with this data since $L$ is large and learning rate is $\mathcal{O}(\frac{1}{L})$. Both are descending, but are moving extremely slowly toward $x^*$, and the larger learning rate for SARAH hardly presents an advantage. We can see benefit of the adaptive learning rate of ADAM for both Exp A and B; it is moving toward it much faster and it continues to descend as iterations increase ($||x_t-x^*||$ vs. epochs).
+
+Comparing SARAH and SVRG, we run the inner loop for half an epoch  in Exp. A and for 30 epochs in Exp. B.  The parameter choice in Exp. B adheres with SARAH's variance bound requirement $\sigma_{m}\stackrel{def}{=}\frac{1}{\mu\eta(m+1)}+\frac{\eta L}{2-\eta L} < 1$. Note that for this data, the iterations required for an $\epsilon$ accurate convergence with SARAH, for a reasonable choice of $\epsilon$, was prohibitive. In both Exp. A and B, $||x_t - x_{t-1}||$ is clearly smoother for SARAH than SVRG, however we observe that the number of effective passes over the data in the inner loop can matter. In both the $||Ax_t-b||$ and $||x_t-x^*||$ plots, SARAH will stray away from the optimal solution due to bias after around 4 epochs.  It is ultimately corrected by the second outer loop step, but we can see how the biased steps of the inner loop can cause SARAH drift, whereas SVRG continues to descend. As is the reality of statistics, we are trading variance for bias.

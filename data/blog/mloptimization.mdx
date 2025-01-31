@@ -1,19 +1,21 @@
 ---
 title: Machine Learning Optimization - Stochastic Descent, Variance Reduction Techniques, and the Bias-Variance Tradeoff
-date: 'April 2024'
+date: 'January 2025'
 tags: ['SDS program', 'machine learning', 'optimization', 'gradient descent', 'variance reduction', 'stochastic gradient descent', 'statistics', 'python']
 layout: PostBanner
 images: ['/static/files/ml_optimization/images/ml_optimizationheader.png']
 draft: false
 summary: A dive into techniques and statistical background in machine learning optimization, with focus upon stochastic gradient descent, variance reduction techniques, and the bias-variance tradeoff.
 bibliography: /bib/mloptimization.bib
+noCite: ["@nguyen", "@kingma", "@Beznosikov", "@Chauhan", "@Grbzbalaban", "@chenadamenhanced", "@wangprovable", "@defossezsimple", "@inproceedings", "@heconvergence", "@adamrandomblock", "@ruderoverview", "@tensorflow", "@sarahm", "@reddidivergence", "@winequality", "@Johnson", "@arnold2019", "@gower2020variancereducedmethodsmachinelearning", "@Hastie2004"]
 ---
+
 
 ## Introduction
 
 The intent of this post is to explore some examples of variance reduction techniques in gradient descent optimization methods for machine learning, with some focus on their underlying statistical concepts. We will use the ADAM optimizer, a popular algorithm in neural network optimization and deep learning, and the less prolific SARAH optimizer (a variant of SVRG) as examples of algorithms in practice, with additional background on the methodologies from which these stochastic optimizers are derived including SGD, SAG, SAGA, and SVRG. In addition to exploring the techniques themselves, we will lend some focused attention to some bias-variance tradeoffs unique to variance reduction techniques, which are unrelated to the typical overfitting/overparameterization bias-variance tradeoff traditionally examined in machine learning. There are many resources available online for all of these topics, and I will provide [some links to my favorites](#suggested-resources), but my aim is to cover the basic underlying concepts needed to build some more common and contemporary algorithms.
 
-This post will cover variance reduction techniques with some technical statistical details, and assumes the reader has a basic understanding of machine learning principles and gradient descent ([here's a 3Blue1Brown video if you need a refresher](https://www.youtube.com/watch?v=IHZwWFHWa-w), but I also dedicated [a section of this post to my own refresher](#crash-course%3A-gradient-descent)). But, my intent is to make these topics accessible for an audience looking for some enhanced understanding of techniques in machine learning optimization. I will include links and additional details wherever I feel it's warranted, but I am open to [any feedback you may have](mailto:avsalce@gmail.com).
+This post will cover variance reduction techniques with some technical statistical details, and assumes the reader has a basic understanding of machine learning principles and gradient descent ([here's a 3Blue1Brown video if you need a refresher](https://www.youtube.com/watch?v=IHZwWFHWa-w), but I also dedicated [a section of this post to my own refresher](/blog/mloptimization/gd)). But, my intent is to make these topics accessible for an audience looking for some enhanced understanding of techniques in machine learning optimization. I will include links and additional details wherever I feel it's warranted, but I am open to [any feedback you may have](mailto:avsalce@gmail.com).
 
 Information for this post is largely drawn from my final project for an optimization course I took in the Spring of 2024, for which the paper and presentation are avialable below. 
 
@@ -39,8 +41,18 @@ This is a visual example of the topics and algorithms we intend to cover. The gr
 
 This example is using some contrived data, but the settings for each algorithm are approximately analagous (we'll see what "approximately" means as the algorithms are different in methodology), and they are running for the same number of iterations. We can see that the variants of SGD can progress closer to the solution, each with qualitatively smaller variance than SGD, which encapsulates our general motivation for utilizing variance reduction techniques in stochastic gradient descent style algorithms.  If we reduce variance in the steps, we can be more efficient about converging to the true solution. We will dive into some of these techniques and their underlying theory to better understand how we can balance variance reduction with convergence properties, algorithm computational efficiency, and unintended bias that can be a byproduct of these methodologies.
 
+> [!NOTE]
+> Updated January 2025, this post has been split into some smaller posts, use the *Table of Contents* links on each page to navigate.
 
-## Crash Course: Gradient Descent
+
+> # Table of Contents
+> ## [1: Crash Course: Gradient Descent](/blog/mloptimization/gd)
+> ## [2: Stochastic Gradient Descent](/blog/mloptimization/stochasticgd)
+> ## [3: Variance Reduction Techniques](/blog/mloptimization/variancereduction)
+> ## [4: SARAH and ADAM Algorithms](/blog/mloptimization/sarahadam)
+
+{/* 
+## [Crash Course: Gradient Descent](/blog/mloptimization/gd)
 
 *This section is some entry-level background to machine learning concepts, [so please skip if you already have a grasp](#stochastic-gradient-descent).*
 
@@ -195,6 +207,8 @@ In machine learning optimization, we are always seeking faster ways to train our
 
 These are the kinds of questions that might motivate a search for more efficient algorithms. A common approach to address such motives is to use approximations, for which stochasticity has some desirable theoretical properties to help us.
 
+
+## [Stochastic Gradient Descent](/blog/mloptimization/stochasticgd)
 ## Stochastic Gradient Descent
 
 Stochastic methods are common in many areas of computational mathematics and are desirable for improving computational performance by leveraging random operations. A stochastic approach to gradient descent is a natural extension; we want to speed up an inherently slow but robust method for training our machine learning models.
@@ -315,6 +329,7 @@ If we select $\alpha_k = \frac{1}{\sqrt{T}}$, we achieve a convergence rate of $
 
 We are able to quantify a bound for the variance of SGD, and we can now start to explore what different approaches we may take to reduce it.
 
+## [Variance Reduction Techniques](/blog/mloptimization/variancereduction)
 ## Variance Reduction Techniques
 
 ### The Bias-Variance Tradeoff
@@ -609,6 +624,7 @@ SAGA's modified algorithm makes the iterations unbiased, however by doing so we 
 
 We have covered some basics of stochastic gradient descent algortihms, as well as some basic approaches to variance reduction, but I also wanted to include some supplemental material for further reading on the basics of the topics. If you are interested in learning more about some common techniques, I recommend [this paper on variance reduction techniques in machine learning](https://arxiv.org/abs/2010.00892) [@gower2020variancereducedmethodsmachinelearning].
 
+## [SARAH and ADAM Algorithms](/blog/mloptimization/sarahadam)
 ## SARAH
 
 SARAH, or StochAstic Recursive grAdient algoritHm, is a stochastic gradient descent method that utilizes *recursive gradient information* to reduce variance in the steps. The algorithm is a modification of the method SVRG (Stochastic Variance Reduced Gradient), which we will briefly cover, and is widely used as one of the benchmark algorithms for comparison to new gradient descent style methods. As with other methods we have seen until now, some of its core assumptions for convergence require a convex objective function (or strongly-convex) with Lipschitz continuous gradient. SARAH is a good example of an algorithm that is actually biased, but can be an improvement over SVRG if conditions are considered carefully.
@@ -1015,7 +1031,7 @@ The least squares objective was chosen because it is strongly convex.  $x^*$ was
 
 See Figures 1 and 2 for settings and computation time. The two examples chosen illustrate some high level takeaways. In terms of per-iteration computational performance, both ADAM and SARAH are virtually identical to SVRG, though ADAM can become slightly slower for increased batch sizes. SARAH and SVRG are limited in flexibility for learning rate with this data since $L$ is large and learning rate is $\mathcal{O}(\frac{1}{L})$. Both are descending, but are moving extremely slowly toward $x^*$, and the larger learning rate for SARAH hardly presents an advantage. We can see benefit of the adaptive learning rate of ADAM for both Exp A and B; it is moving toward it much faster and it continues to descend as iterations increase ($||x_t-x^*||$ vs. epochs).
 
-Comparing SARAH and SVRG, we run the inner loop for half an epoch  in Exp. A and for 30 epochs in Exp. B.  The parameter choice in Exp. B adheres with SARAH's variance bound requirement $\sigma_{m}\stackrel{def}{=}\frac{1}{\mu\eta(m+1)}+\frac{\eta L}{2-\eta L} < 1$. Note that for this data, the iterations required for an $\epsilon$ accurate convergence with SARAH, for a reasonable choice of $\epsilon$, was prohibitive. In both Exp. A and B, $||x_t - x_{t-1}||$ is clearly smoother for SARAH than SVRG, however we observe that the number of effective passes over the data in the inner loop can matter. In both the $||Ax_t-b||$ and $||x_t-x^*||$ plots, SARAH will stray away from the optimal solution due to bias after around 4 epochs.  It is ultimately corrected by the second outer loop step, but we can see how the biased steps of the inner loop can cause SARAH drift, whereas SVRG continues to descend. As is the reality of statistics, we are trading variance for bias.
+Comparing SARAH and SVRG, we run the inner loop for half an epoch  in Exp. A and for 30 epochs in Exp. B.  The parameter choice in Exp. B adheres with SARAH's variance bound requirement $\sigma_{m}\stackrel{def}{=}\frac{1}{\mu\eta(m+1)}+\frac{\eta L}{2-\eta L} < 1$. Note that for this data, the iterations required for an $\epsilon$ accurate convergence with SARAH, for a reasonable choice of $\epsilon$, was prohibitive. In both Exp. A and B, $||x_t - x_{t-1}||$ is clearly smoother for SARAH than SVRG, however we observe that the number of effective passes over the data in the inner loop can matter. In both the $||Ax_t-b||$ and $||x_t-x^*||$ plots, SARAH will stray away from the optimal solution due to bias after around 4 epochs.  It is ultimately corrected by the second outer loop step, but we can see how the biased steps of the inner loop can cause SARAH drift, whereas SVRG continues to descend. As is the reality of statistics, we are trading variance for bias. */}
 
 
 
@@ -1086,8 +1102,8 @@ $$
 + If the objective function $f$ is *strongly* convex, then the minimum is unique.
 
 *Return to*
-+ [Gradient Descent in Machine Learning](#gradient-descent-in-machine-learning)
-+ [SVRG Convergence](#svrg-convergence)
++ [Gradient Descent in Machine Learning](/blog/mloptimization/gd#gradient-descent-in-machine-learning)
++ [SVRG Convergence](/blog/mloptimization/sarahadam#svrg-convergence)
 
 ### Lipschitz Continuity
 
@@ -1110,7 +1126,7 @@ $$
 + If $f$ is twice differentiable such that $|| \nabla^2 f(x) || \leq L$ for all $x$ and some $L>0$, then $f$ has a Lipschitz continuous gradient with constant $L$.
 
 *Return to*
-+ [Limitations of Regular Gradient Descent](#limitations-of-regular-gradient-descent)
++ [Limitations of Regular Gradient Descent](/blog/mloptimization/gd#limitations-of-regular-gradient-descent)
 
 ### Consistency
 
@@ -1161,7 +1177,7 @@ $$
 $$
 
 *Return to*
-+ [Limitations of Regular Gradient Descent](#limitations-of-regular-gradient-descent)
++ [Limitations of Regular Gradient Descent](/blog/mloptimization/gd#limitations-of-regular-gradient-descent)
 
 #### Stochastic gradient calculation
 Select a random index $i$ from $\{ 1,...n \}$.
@@ -1224,8 +1240,8 @@ $$
 $$
 
 *Return to*
-+ [Limitations of Regular Gradient Descent](#limitations-of-regular-gradient-descent)
-+ [Stochastic Gradient Descent](#stochastic-gradient-descent)
++ [Limitations of Regular Gradient Descent](/blog/mloptimization/gd#limitations-of-regular-gradient-descent)
++ [Stochastic Gradient Descent](/blog/mloptimization/stochasticgd#stochastic-gradient-descent)
 
 #### Batch gradient calculation
 
@@ -1314,7 +1330,7 @@ $$
 Which results in the average of the selected gradients.
 
 *Return to*
-+ [Minibatch SGD](#minibatch-sgd)
++ [Minibatch SGD](/blog/mloptimization/variancereduction#minibatch-sgd)
 
 
 
