@@ -8,6 +8,7 @@ import TableWrapper from './TableWrapper'
 import PhotosSwiperPhotography from './aboutme/PhotosSwiperAM'
 import PhotosSwiperMusic from './aboutme/MusicSwiperAM'
 import PhotosSwiperOutdoors from './aboutme/OutdoorsSwiperAM'
+import SocialIcon from '@/components/social-icons'
 
 export const components: MDXComponents = {
   Image,
@@ -19,4 +20,5 @@ export const components: MDXComponents = {
   PhotosSwiperPhotography,
   PhotosSwiperMusic,
   PhotosSwiperOutdoors,
+  SocialIcon,
 }
